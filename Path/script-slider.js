@@ -1,8 +1,14 @@
-(() => {
-    const pagesCount = 3; // nombre de pages (modifiable)
+function initSlider() {
+
+    const pagesCount = 3; // nombre de pages
     const blocsPerPage = 6;
     const pagesWrapper = document.getElementById('pages-wrapper');
     const pageNumber = document.getElementById('pageNumber');
+
+    if (!pagesWrapper) {
+        console.warn('pages-wrapper introuvable');
+        return;
+    }
 
     function createTable() {
         const table = document.createElement('table');
@@ -18,7 +24,9 @@
 
         const thead = document.createElement('thead');
         thead.innerHTML = `
-         <tr class="badge-header"><th colspan="7">Badge : Laurent B ( 0001 ) </th></tr>
+            <tr class="badge-header">
+                <th colspan="7">Badge : Laurent B ( 0001 )</th>
+            </tr>
             <tr>
                 <th>Fiche</th>
                 <th>Train</th>
@@ -39,6 +47,7 @@
     function createPage() {
         const page = document.createElement('main');
         page.className = 'grid-main';
+
         for (let i = 0; i < blocsPerPage; i++) {
             const bloc = document.createElement('div');
             bloc.className = 'bloc';
@@ -48,21 +57,23 @@
         return page;
     }
 
-    // Création des pages réelles
+    // Nettoyage si rechargement
+    pagesWrapper.innerHTML = '';
+
+    // Création pages
     for (let p = 0; p < pagesCount; p++) {
-        const page = createPage();
-        pagesWrapper.appendChild(page);
+        pagesWrapper.appendChild(createPage());
     }
 
-    // Clonage pour boucle infinie
+    // Clones (slider infini)
     const pages = pagesWrapper.children;
-    const firstPageClone = pages[0].cloneNode(true);
-    const lastPageClone = pages[pages.length - 1].cloneNode(true);
+    const firstClone = pages[0].cloneNode(true);
+    const lastClone = pages[pages.length - 1].cloneNode(true);
 
-    pagesWrapper.insertBefore(lastPageClone, pages[0]);
-    pagesWrapper.appendChild(firstPageClone);
+    pagesWrapper.insertBefore(lastClone, pages[0]);
+    pagesWrapper.appendChild(firstClone);
 
-    let currentPage = 1; // commence à la vraie première page
+    let currentPage = 1;
     const totalPages = pagesCount + 2;
 
     const prevBtn = document.getElementById('prevBtn');
@@ -79,17 +90,18 @@
         if (animate) isAnimating = true;
 
         const pageHeight = pagesWrapper.children[0].clientHeight;
-        if (!animate) {
-            pagesWrapper.style.transition = 'none';
-        } else {
-            pagesWrapper.style.transition = 'transform 0.4s ease';
-        }
-        pagesWrapper.style.transform = `translateY(${-currentPage * pageHeight}px)`;
+
+        pagesWrapper.style.transition = animate
+            ? 'transform 0.4s ease'
+            : 'none';
+
+        pagesWrapper.style.transform =
+            `translateY(${-currentPage * pageHeight}px)`;
 
         updatePageNumber();
 
         if (!animate) {
-            void pagesWrapper.offsetHeight; // force reflow
+            void pagesWrapper.offsetHeight;
             pagesWrapper.style.transition = 'transform 0.4s ease';
             isAnimating = false;
         }
@@ -107,18 +119,20 @@
         }
     });
 
-    prevBtn.addEventListener('click', () => {
+    prevBtn?.addEventListener('click', () => {
         if (isAnimating) return;
         currentPage--;
         updateSlider();
     });
 
-    nextBtn.addEventListener('click', () => {
+    nextBtn?.addEventListener('click', () => {
         if (isAnimating) return;
         currentPage++;
         updateSlider();
     });
 
-    // Initialisation : positionner sur la vraie première page sans animation
     updateSlider(false);
-})();
+}
+
+/* exposition globale */
+window.initSlider = initSlider;
