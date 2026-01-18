@@ -1,13 +1,13 @@
 (() => {
-    const pagesCount = 3; // nombre de pages
-    const blocsPerPage = 6;
+    const pagesCount = 2;        // nombre de pages
+    const blocsPerPage = 4;      // nombre de blocs par page (modifiable)
 
     const pagesWrapper = document.getElementById('pages-wrapper');
     const pageNumber = document.getElementById('pageNumber');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
 
-    let currentPage = 0; // index réel (0 → pagesCount-1)
+    let currentPage = 0;         // index réel (0 → pagesCount-1)
 
     function createTable() {
         const table = document.createElement('table');
@@ -54,6 +54,14 @@
             bloc.appendChild(createTable());
             page.appendChild(bloc);
         }
+
+        // 2 colonnes fixes, lignes calculées
+        const cols = 2;
+        const rows = Math.ceil(blocsPerPage / cols);
+
+        page.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        page.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
         return page;
     }
 
