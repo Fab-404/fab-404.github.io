@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Dashboard WMS</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  label { display: block; margin: 10px 0 5px; }
+  input, button, textarea { font-size: 16px; padding: 6px; width: 100%; max-width: 400px; }
+  button { cursor: pointer; margin-top: 10px; }
+  textarea { height: 150px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<h1>Admin Configuration WMS</h1>
+
+<label for="badgeList">Liste des badges (séparés par virgule) :</label>
+<input id="badgeList" type="text" placeholder="Ex: 0001,0002,0003" />
+
+<label for="blocksPerPage">Nombre de blocs par page :</label>
+<input id="blocksPerPage" type="number" min="1" max="10" value="4" />
+
+<label for="rawConfig">Config JSON brute (optionnel) :</label>
+<textarea id="rawConfig" placeholder="Voir la config complète ici"></textarea>
+
+<button id="saveBtn">Sauvegarder la config</button>
+<button id="loadBtn">Charger la config</button>
+<button id="resetBtn">Réinitialiser la config</button>
+
+<script>
+(() => {
+  const DEFAULT_CONFIG = {
+    badges: ['0001'],
+    blocksPerPage: 4
+  };
+
+  const badgeListInput = document.getElementById('badgeList');
+  const blocksInput = document.getElementById('blocksPerPage');
+  const rawConfigTextarea = document.getElementById('rawConfig');
+  const saveBtn = document.getElementById('saveBtn');
+  const loadBtn = document.getElementById('loadBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function loadConfig() {
+    let config = localStorage.getItem('wmsDashboardConfig');
+    if (config) {
+      try {
+        config = JSON.parse(config);
+      } catch {
+        config = DEFAULT_CONFIG;
+      }
+    } else {
+      config = DEFAULT_CONFIG;
+    }
+    badgeListInput.value = config.badges.join(',');
+    blocksInput.value = config.blocksPerPage;
+    rawConfigTextarea.value = JSON.stringify(config, null, 2);
+    return config;
+  }
+
+  function saveConfig() {
+    const badges = badgeListInput.value.split(',').map(b => b.trim()).filter(Boolean);
+    const blocksPerPage = parseInt(blocksInput.value) || DEFAULT_CONFIG.blocksPerPage;
+    const config = { badges, blocksPerPage };
+    localStorage.setItem('wmsDashboardConfig', JSON.stringify(config));
+    rawConfigTextarea.value = JSON.stringify(config, null, 2);
+    alert('Config sauvegardée');
+  }
+
+  function resetConfig() {
+    localStorage.removeItem('wmsDashboardConfig');
+    loadConfig();
+  }
+
+  saveBtn.addEventListener('click', saveConfig);
+  loadBtn.addEventListener('click', loadConfig);
+  resetBtn.addEventListener('click', resetConfig);
+
+  // Charge config au démarrage
+  loadConfig();
+
+})();
+</script>
+
+</body>
+</html>
