@@ -186,3 +186,10 @@ body {
   pointer-events: none; /* éviter d’interférer avec les clics */
 }
 
+#configBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
