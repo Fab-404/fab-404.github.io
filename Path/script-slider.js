@@ -1,30 +1,57 @@
 (() => {
+    /* ===============================
+       DONNÉES
+    =============================== */
     const ALL_MISSIONS = window.__MISSIONS__ || [];
 
-    const BADGE = '0001';
-    const missions = ALL_MISSIONS.filter(
-        m => m.personnel?.badge === BADGE
+    console.log('[DASHBOARD] missions totales:', ALL_MISSIONS.length);
+
+    /* ===============================
+       CONFIG (simple)
+    =============================== */
+    const CONFIG_KEY = 'wmsDashboardConfig';
+
+    const config = JSON.parse(
+        localStorage.getItem(CONFIG_KEY) || '{"badges":["0001"]}'
     );
 
-    console.log('[DASHBOARD] missions totales:', ALL_MISSIONS.length);
-    console.log('[DASHBOARD] missions badge 0001:', missions.length);
+    const BADGES = config.badges;
+
+    console.log('[DASHBOARD] badges config:', BADGES);
 
     const pagesWrapper = document.getElementById('pages-wrapper');
 
     /* ===============================
-       CONFIG SIMPLE
+       PARAMÈTRES GRID
     =============================== */
-    const pagesCount = 1;
-    const blocsPerPage = 4;
+    const blocsPerPage = 4; // 2x2
+    const cols = 2;
+    const rows = 2;
 
-    function createTable() {
+    /* ===============================
+       UTILS
+    =============================== */
+    function getMissionsByBadge(badge) {
+        return ALL_MISSIONS.filter(
+            m => m.personnel?.badge === badge
+        );
+    }
+
+    /* ===============================
+       TABLE
+    =============================== */
+    function createTable(badge) {
+        const missions = getMissionsByBadge(badge);
+
+        console.log(`[DASHBOARD] badge ${badge}:`, missions.length);
+
         const table = document.createElement('table');
         table.className = 'missions-table';
 
         table.innerHTML = `
             <thead>
                 <tr class="badge-header">
-                    <th colspan="7">Badge : 0001</th>
+                    <th colspan="7">Badge : ${badge}</th>
                 </tr>
                 <tr>
                     <th>Fiche</th>
@@ -58,25 +85,31 @@
         return table;
     }
 
-    function createPage() {
+    /* ===============================
+       PAGE
+    =============================== */
+    function createPage(badgesSlice) {
         const page = document.createElement('main');
         page.className = 'grid-main';
 
-        for (let i = 0; i < blocsPerPage; i++) {
+        badgesSlice.forEach(badge => {
             const bloc = document.createElement('div');
             bloc.className = 'bloc';
-            bloc.appendChild(createTable());
+            bloc.appendChild(createTable(badge));
             page.appendChild(bloc);
-        }
+        });
 
-        page.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        page.style.gridTemplateRows = 'repeat(2, 1fr)';
+        page.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        page.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
         return page;
     }
 
-    for (let i = 0; i < pagesCount; i++) {
-        pagesWrapper.appendChild(createPage());
+    /* ===============================
+       GÉNÉRATION DES PAGES
+    =============================== */
+    for (let i = 0; i < BADGES.length; i += blocsPerPage) {
+        const slice = BADGES.slice(i, i + blocsPerPage);
+        pagesWrapper.appendChild(createPage(slice));
     }
 })();
-Dashboard
