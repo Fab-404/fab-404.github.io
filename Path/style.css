@@ -41,7 +41,7 @@ body {
     text-decoration: underline;
 }
 
-/* Grille principale 2x2 
+/* Grille principale 2x2*/ 
 .grid-main {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -49,16 +49,9 @@ body {
     gap: 16px;
     height: calc(100vh - 96px); /* top + footer */
     padding: 16px;
-}*/
+} 
 
-.grid-main {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: min-content; /* lignes s'adaptent au contenu */
-    gap: 16px;
-    height: auto; /* ne pas fixer la hauteur */
-    padding: 16px;
-}
+
 
 /* Bloc */
 .bloc {
@@ -251,6 +244,7 @@ body {
     color: green;
     display: none;
 }
+
 
 
 
