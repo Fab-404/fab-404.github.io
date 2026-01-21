@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard WMS</title>
+<link rel="stylesheet" href="https://fab-404.github.io/Path/style.css" />
+<link rel="stylesheet" href="https://fab-404.github.io/Path/config-style.css" />
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left"><span class="logo">WMS</span></div>
+</div>
+
+<div class="slider-container">
+  <div class="pages-wrapper" id="pages-wrapper"></div>
+</div>
+
+<div class="bottom-bar">© WMS</div>
+
+<button id="config-toggle-btn" title="Afficher/Masquer la configuration">⚙ Config</button>
+
+<div id="config-panel">
+  <label for="grids-per-page">Nombre de grilles (blocs) :</label>
+  <input type="number" id="grids-per-page" min="1" max="10" value="4" />
+
+  <label for="badges-list">Liste des badges (séparés par virgules) :</label>
+  <input type="text" id="badges-list" placeholder="ex: 0001,0002,0003" />
+
+  <button id="config-save-btn">Sauvegarder</button>
+  <div id="save-status">Configuration sauvegardée !</div>
+</div>
+
+<script>
+  // Conteneur données missions
+  window.missionsData = [];
+
+  // Reception des données depuis le script Tampermonkey via postMessage
+  window.addEventListener('message', (event) => {
+    // Optionnel : vérifier event.origin si nécessaire
+
+    if(event.data && event.data.type === 'missionsData') {
+      window.missionsData = event.data.payload || [];
+      console.log('[Dashboard] missions reçues:', window.missionsData.length);
+
+      // Ici, tu peux déclencher le rendu du dashboard, ex:
+      if(typeof renderDashboard === 'function') {
+        renderDashboard(window.missionsData);
+      }
+    }
+  }, false);
+
+  // Chargement config au démarrage
+  const STORAGE_KEY = 'wmsDashboardConfig';
+  function loadConfig() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if(stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+  const config = loadConfig();
+  console.log('[Dashboard] config chargée:', config);
+</script>
+
+<script src="https://livai404.github.io/404sfab.github.io/Path/script-slider.js"></script>
+<script src="https://fab-404.github.io/Path/script-config.js"></script>
+
+</body>
+</html>
