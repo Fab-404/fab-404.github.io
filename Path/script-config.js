@@ -1,4 +1,5 @@
-(function() {
+document.addEventListener('DOMContentLoaded', () => {
+
     // Toggle panneau config
     const toggleBtn = document.getElementById('config-toggle-btn');
     const panel = document.getElementById('config-panel');
@@ -34,31 +35,25 @@
         const badges = badgesInput.value.split(',').map(b => b.trim()).filter(b => b.length);
         const config = { gridsPerPage: grids, badges };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        console.log('[Config] sauvegardée dans localStorage:', config); // log sauvegarde
         status.style.display = 'block';
         setTimeout(() => { status.style.display = 'none'; }, 2000);
-
-        // TODO: Optionnellement déclencher rafraîchissement du dashboard ici
     });
-})();
 
-// --- Affichage console config à l'ouverture ---
-
-(function() {
-  const STORAGE_KEY = 'wmsDashboardConfig';
-
-  function logConfig() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const config = JSON.parse(stored);
-        console.log('[Config] config chargée depuis localStorage:', config);
-      } catch (e) {
-        console.warn('[Config] erreur parsing config', e);
-      }
-    } else {
-      console.log('[Config] aucune config sauvegardée en localStorage');
+    // Log config au chargement
+    function logConfig() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                const config = JSON.parse(stored);
+                console.log('[Config] config chargée depuis localStorage:', config);
+            } catch (e) {
+                console.warn('[Config] erreur parsing config', e);
+            }
+        } else {
+            console.log('[Config] aucune config sauvegardée en localStorage');
+        }
     }
-  }
+    logConfig();
 
-  logConfig();
-})();
+});
