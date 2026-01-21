@@ -193,3 +193,13 @@ body {
     z-index: 1000;
 }
 
+
+#configBox {
+    position: fixed;
+    top: 50px;
+    right: 10px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    z-index: 1001;
+}
