@@ -1,26 +1,21 @@
 (() => {
   const pagesWrapper = document.getElementById('pages-wrapper');
-
   const STORAGE_KEY = 'wmsDashboardConfig';
 
-  // Charger config depuis localStorage ou valeurs par défaut
   function loadConfig() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch {
-        return null;
-      }
+      } catch {}
     }
-    return null;
+    // valeurs par défaut
+    return { gridsPerPage: 4, badges: ['0001'] };
   }
 
-  // Crée un tableau pour un badge donné avec ses missions
   function createTable(badge, missions) {
     const table = document.createElement('table');
     table.className = 'missions-table';
-
     table.innerHTML = `
       <thead>
         <tr class="badge-header">
@@ -38,7 +33,6 @@
       </thead>
       <tbody></tbody>
     `;
-
     const tbody = table.querySelector('tbody');
 
     missions.forEach(m => {
@@ -58,7 +52,6 @@
     return table;
   }
 
-  // Crée une page avec N blocs (grilles), chaque bloc un tableau
   function createPage(badges, missionsByBadge, blocsPerPage) {
     const page = document.createElement('main');
     page.className = 'grid-main';
@@ -70,56 +63,37 @@
       bloc.className = 'bloc';
 
       const missions = missionsByBadge[badge] || [];
-      const table = createTable(badge, missions);
+      bloc.appendChild(createTable(badge, missions));
 
-      bloc.appendChild(table);
       page.appendChild(bloc);
     });
 
-    // Grille dynamique en fonction des blocs
-    const cols = Math.min(2, toDisplay.length);
-    const rows = Math.ceil(toDisplay.length / cols);
-
-    page.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    page.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    // Fixe 2 colonnes, nombre de lignes automatique
+    page.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    page.style.gridAutoRows = 'min-content';
 
     return page;
   }
 
-  // Rendu complet
   function renderDashboard(missions) {
-    pagesWrapper.innerHTML = ''; // Clear précédent contenu
+    pagesWrapper.innerHTML = '';
 
-    const config = loadConfig() || { gridsPerPage: 4, badges: ['0001'] };
-
+    const config = loadConfig();
     console.log('[Dashboard] Config:', config);
 
-    // Grouper missions par badge
     const missionsByBadge = {};
-    config.badges.forEach(badge => {
-      missionsByBadge[badge] = [];
-    });
-
+    config.badges.forEach(b => missionsByBadge[b] = []);
     missions.forEach(m => {
-      const badge = m.personnel?.badge;
-      if (badge && missionsByBadge.hasOwnProperty(badge)) {
-        missionsByBadge[badge].push(m);
-      }
+      const b = m.personnel?.badge;
+      if (b && missionsByBadge[b]) missionsByBadge[b].push(m);
     });
 
-    // Pour l'instant, 1 page
-    const pagesCount = 1;
-
-    for (let i = 0; i < pagesCount; i++) {
-      const page = createPage(config.badges, missionsByBadge, config.gridsPerPage);
-      pagesWrapper.appendChild(page);
-    }
+    const page = createPage(config.badges, missionsByBadge, config.gridsPerPage);
+    pagesWrapper.appendChild(page);
   }
 
-  // Expose renderDashboard pour le recevoir depuis postMessage
   window.renderDashboard = renderDashboard;
 
-  // Si missions déjà présentes au chargement (ex: window.__MISSIONS__)
   if (window.missionsData && window.missionsData.length) {
     renderDashboard(window.missionsData);
   }
