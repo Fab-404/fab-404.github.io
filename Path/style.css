@@ -41,7 +41,7 @@ body {
     text-decoration: underline;
 }
 
-/* Grille principale 2x2 */
+/* Grille principale 2x2 
 .grid-main {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -49,6 +49,13 @@ body {
     gap: 16px;
     height: calc(100vh - 96px); /* top + footer */
     padding: 16px;
+}*/
+
+.grid-main {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  height: auto;
 }
 
 /* Bloc */
@@ -242,5 +249,6 @@ body {
     color: green;
     display: none;
 }
+
 
 
