@@ -40,3 +40,25 @@
         // TODO: Optionnellement déclencher rafraîchissement du dashboard ici
     });
 })();
+
+// --- Affichage console config à l'ouverture ---
+
+(function() {
+  const STORAGE_KEY = 'wmsDashboardConfig';
+
+  function logConfig() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const config = JSON.parse(stored);
+        console.log('[Config] config chargée depuis localStorage:', config);
+      } catch (e) {
+        console.warn('[Config] erreur parsing config', e);
+      }
+    } else {
+      console.log('[Config] aucune config sauvegardée en localStorage');
+    }
+  }
+
+  logConfig();
+})();
