@@ -1,6 +1,7 @@
 // ==UserScript==
+// @version      1.21.26
 // @name         WMS – Dashboard externe
-// @match        file:///C:/Users/jdmor/Desktop/Nouveau%20dossier*
+// @match        *://*/*
 // @grant        none
 // ==/UserScript==
 
@@ -26,9 +27,9 @@
                     try {
                         const json = JSON.parse(this.responseText);
                         missionsData = json.missions || [];
-                        console.log('[WMS] Missions chargées:', missionsData.length);
+                        console.log('[WMS] missions capturées:', missionsData.length);
                     } catch (e) {
-                        console.error('[WMS] Erreur JSON', e);
+                        console.error('[WMS] erreur JSON', e);
                     }
                 }
             });
@@ -37,10 +38,10 @@
     })(XMLHttpRequest.prototype.send);
 
     /* ===============================
-       BOUTON ACTION
+       BOUTON
     =============================== */
     const btn = document.createElement('button');
-    btn.textContent = 'Action';
+    btn.textContent = 'Dashboard';
     Object.assign(btn.style, {
         position: 'fixed',
         bottom: '20px',
@@ -59,69 +60,42 @@
     =============================== */
     btn.addEventListener('click', () => {
 
-        const badgeFilter = '0001';
-        const filtered = missionsData.filter(
-            m => m.personnel?.badge === badgeFilter
-        );
+        console.log('[WMS] ouverture dashboard');
 
         const html = `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard WMS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- CSS GitHub Pages -->
-    <link rel="stylesheet" href="https://fab-404.github.io/Path/style.css">
-
+<meta charset="UTF-8">
+<title>Dashboard WMS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fab-404.github.io/Path/style.css">
 </head>
 <body>
 
 <div class="top-bar">
     <div class="top-bar-left"><span class="logo">WMS</span></div>
-    <div class="top-bar-right">
-        <a href="#">Dashboard</a>
-        <a href="#">Missions</a>
-        <a href="#">Admin</a>
-    </div>
 </div>
 
 <div class="slider-container">
-    <div class="pages-wrapper" id="pages-wrapper">
-        <div class="bloc">
-            <table class="missions-table">
-
-
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="slider-controls">
-    <button id="prevBtn">‹ Précédent</button>
-    <button id="nextBtn">Suivant ›</button>
+    <div class="pages-wrapper" id="pages-wrapper"></div>
 </div>
 
 <div class="bottom-bar">© WMS</div>
 
-<!-- JS GitHub Pages -->
+<script>
+    window.__MISSIONS__ = ${JSON.stringify(missionsData)};
+    console.log('MISSIONS TRANSMISES:', window.__MISSIONS__.length);
+</script>
+
 <script src="https://fab-404.github.io/Path/script-slider.js"></script>
 
-
 </body>
-</html>
-        `;
+</html>`;
 
-const blob = new Blob([html], { type: 'text/html' });
-const url = URL.createObjectURL(blob);
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
 
-window.open(
-    url,
-    '_blank',
-    'width=1200,height=800,noopener'
-);
-
+        window.open(url, '_blank', 'width=1200,height=800,noopener');
     });
-
 })();
