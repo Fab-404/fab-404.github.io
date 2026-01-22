@@ -1,0 +1,211 @@
+/* ---------- Reset et base ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #222;
+  background: #f5f5f5;
+  line-height: 1.5;
+  padding-top: 56px; /* top bar */
+  padding-bottom: 40px; /* footer */
+}
+
+/* ---------- Barres fixes ---------- */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 56px;
+  background: #1e1e1e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+}
+
+.top-bar a {
+  color: #fff;
+  margin-left: 20px;
+  text-decoration: none;
+}
+
+.top-bar a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Grille principale (responsive) ---------- */
+.grid-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 colonnes */
+  gap: 16px;
+  padding: 16px;
+  height: auto; /* auto permet l’adaptation au contenu */
+  align-items: start;
+}
+
+/* ---------- Bloc ---------- */
+.bloc {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 8px;
+  height: auto; /* important */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Tableaux ---------- */
+.missions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed; /* colonnes fixes */
+}
+
+.missions-table th,
+.missions-table td {
+  border: 1px solid #aaa;
+  padding: 4px 6px;
+  text-align: center;
+  font-weight: normal;
+  height: auto; /* auto laisse le tr s’adapter */
+}
+
+.missions-table th {
+  background-color: #053544;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 600;
+}
+
+/* alterner couleurs lignes */
+.missions-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* header du badge */
+.badge-header {
+  background-color: rgb(197, 0, 0);
+  color: black;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* ---------- Footer ---------- */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: #1e1e1e;
+  color: #2d99f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  z-index: 1000;
+}
+
+/* ---------- Slider & pages ---------- */
+.slider-container {
+  overflow: hidden;
+  position: relative;
+  height: auto; /* auto pour s’adapter à contenu */
+}
+
+#pages-wrapper {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s ease;
+}
+
+/* ---------- Contrôles ------------ */
+.slider-controls {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 120px;
+  z-index: 1000;
+}
+
+.slider-controls button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #5caece;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.slider-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#pageNumber {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #222;
+  font-weight: bold;
+  z-index: 1001;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px 12px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* ---------- Config UI ---------- */
+#config-toggle-btn {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  z-index: 10000;
+  padding: 8px 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+#config-panel {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  width: 320px;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  padding: 15px;
+  display: none;
+  z-index: 9999;
+}
+
+#config-panel label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+#config-panel input,
+#config-panel button {
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
