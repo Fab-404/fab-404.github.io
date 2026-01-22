@@ -172,7 +172,7 @@ body {
 /* ---------- Config UI ---------- */
 #config-toggle-btn {
   position: fixed;
-  top: 60px;
+  top: 10px;
   right: 20px;
   z-index: 10000;
   padding: 8px 14px;
