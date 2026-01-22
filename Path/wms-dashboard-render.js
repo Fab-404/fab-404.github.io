@@ -88,7 +88,6 @@
         <tr>
           <th>Fiche</th>
           <th>Train</th>
-          <th>Support</th>
           <th>Tournée</th>
           <th>Nb UL</th>
           <th>Poids</th>
@@ -105,7 +104,6 @@
       tr.innerHTML = `
         <td>${m.codeFichePreparation ?? ''}</td>
         <td>${m.posTrain ?? ''}</td>
-        <td>${m.aliasSupport ?? ''}</td>
         <td>${m.tournee ?? ''}</td>
         <td>${m.nombreUl ?? ''}</td>
         <td>${m.poidsBrut ?? ''}</td>
@@ -118,7 +116,7 @@
       const tr = document.createElement('tr');
       tr.className = 'rows-hidden';
       tr.innerHTML = `
-        <td colspan="7">
+        <td colspan="6">
           +${missions.length - maxRows} lignes non affichées
         </td>
       `;
