@@ -116,7 +116,7 @@
       const tr = document.createElement('tr');
       tr.className = 'rows-hidden';
       tr.innerHTML = `
-        <td colspan="6">
+        <td colspan="7">
           +${missions.length - maxRows} lignes non affichées
         </td>
       `;
