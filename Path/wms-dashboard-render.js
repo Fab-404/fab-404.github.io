@@ -62,10 +62,10 @@
 
     return Object.values(grouped).map(g => ({
       codeFichePreparation: g.fiche,
-      posTrain: g.trains.join('/'),
+      posTrain: g.trains.join('-'),
       aliasSupport: g.support,
       tournee: g.tournee,
-      nombreUl: g.nbUl.join('/'),
+      nombreUl: g.nbUl.join('-'),
       /*poidsBrut: g.poidsBrut.join(' + '),*/
        poidsBrut: g.poidsBrut[0] ?? '',
       state: { label: g.etat }
