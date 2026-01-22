@@ -246,6 +246,19 @@ body {
 }
 
 
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/*.refresh-timer {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.85;
+  padding-right: 12px;
+}*/
+
 
 
 
