@@ -75,7 +75,7 @@ function loadAndRenderFromStorage() {
 setInterval(() => {
   console.log('[Dashboard] rafraîchissement automatique des données');
   loadAndRenderFromStorage();
-}, 5 * 60 * 1000);
+}, 1 * 60 * 1000);
 
 // Réception des données depuis Tampermonkey (postMessage)
 window.addEventListener('message', (event) => {
