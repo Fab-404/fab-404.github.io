@@ -46,28 +46,62 @@ console.log('[Dashboard] page chargée');
 // Stockage global des missions
 window.missionsData = [];
 
+// Clé de stockage local pour les missions
+const MISSIONS_STORAGE_KEY = 'wmsDashboardMissions';
+
+// Fonction pour charger missions depuis localStorage et rendre dashboard
+function loadAndRenderFromStorage() {
+  try {
+    const stored = localStorage.getItem(MISSIONS_STORAGE_KEY);
+    if (stored) {
+      window.missionsData = JSON.parse(stored);
+      console.log('[Dashboard] missions chargées depuis localStorage:', window.missionsData.length);
+    } else {
+      window.missionsData = [];
+      console.log('[Dashboard] aucune mission en localStorage');
+    }
+  } catch(e) {
+    window.missionsData = [];
+    console.error('[Dashboard] erreur lecture missions localStorage', e);
+  }
+  if (typeof window.renderDashboard === 'function') {
+    window.renderDashboard(window.missionsData);
+  } else {
+    console.error('[Dashboard] renderDashboard non disponible');
+  }
+}
+
+// Rafraîchir données toutes les 5 minutes
+setInterval(() => {
+  console.log('[Dashboard] rafraîchissement automatique des données');
+  loadAndRenderFromStorage();
+}, 5 * 60 * 1000);
+
 // Réception des données depuis Tampermonkey (postMessage)
 window.addEventListener('message', (event) => {
-
   if (!event.data || event.data.type !== 'missionsData') {
     return;
   }
-
   console.log('[Dashboard] message reçu:', event.data);
+  window.missionsData = Array.isArray(event.data.payload) ? event.data.payload : [];
+  console.log('[Dashboard] missions reçues via postMessage:', window.missionsData.length);
 
-  window.missionsData = Array.isArray(event.data.payload)
-    ? event.data.payload
-    : [];
-
-  console.log('[Dashboard] missions reçues:', window.missionsData.length);
+  // Sauvegarder dans localStorage à chaque réception
+  try {
+    localStorage.setItem(MISSIONS_STORAGE_KEY, JSON.stringify(window.missionsData));
+  } catch(e) {
+    console.error('[Dashboard] erreur sauvegarde missions localStorage', e);
+  }
 
   if (typeof window.renderDashboard === 'function') {
     window.renderDashboard(window.missionsData);
   } else {
     console.error('[Dashboard] renderDashboard non disponible');
   }
-
 }, false);
+
+// Chargement initial des données au démarrage
+loadAndRenderFromStorage();
 
 /* ===============================
    DEBUG CONFIG
