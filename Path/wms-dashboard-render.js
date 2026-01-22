@@ -83,7 +83,7 @@
     table.innerHTML = `
       <thead>
         <tr class="badge-header">
-          <th colspan="7">Badge : ${badge}</th>
+          <th colspan="6">Badge : ${badge}</th>
         </tr>
         <tr>
           <th>Fiche</th>
@@ -116,7 +116,7 @@
       const tr = document.createElement('tr');
       tr.className = 'rows-hidden';
       tr.innerHTML = `
-        <td colspan="7">
+        <td colspan="6">
           +${missions.length - maxRows} lignes non affichées
         </td>
       `;
