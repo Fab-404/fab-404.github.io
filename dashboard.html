@@ -4,9 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dashboard WMS</title>
+
 <link rel="stylesheet" href="https://fab-404.github.io/Path/style.css" />
 <link rel="stylesheet" href="https://fab-404.github.io/Path/config-style.css" />
 </head>
+
 <body>
 
 <div class="top-bar">
@@ -19,8 +21,10 @@
 
 <div class="bottom-bar">© WMS</div>
 
-<button id="config-toggle-btn" title="Afficher/Masquer la configuration">⚙ Config</button>
+<!-- Bouton config -->
+<button id="config-toggle-btn" title="Afficher / Masquer la configuration">⚙ Config</button>
 
+<!-- Panneau config -->
 <div id="config-panel">
   <label for="grids-per-page">Nombre de grilles (blocs) :</label>
   <input type="number" id="grids-per-page" min="1" max="10" value="4" />
@@ -33,41 +37,57 @@
 </div>
 
 <script>
-  // Conteneur données missions
-  window.missionsData = [];
+/* ===============================
+   INIT DASHBOARD
+=============================== */
 
-  // Reception des données depuis le script Tampermonkey via postMessage
-  window.addEventListener('message', (event) => {
-    // Optionnel : vérifier event.origin si nécessaire
+console.log('[Dashboard] page chargée');
 
-    if(event.data && event.data.type === 'missionsData') {
-      window.missionsData = event.data.payload || [];
-      console.log('[Dashboard] missions reçues:', window.missionsData.length);
+// Stockage global des missions
+window.missionsData = [];
 
-      // Ici, tu peux déclencher le rendu du dashboard, ex:
-      if(typeof renderDashboard === 'function') {
-        renderDashboard(window.missionsData);
-      }
-    }
-  }, false);
+// Réception des données depuis Tampermonkey (postMessage)
+window.addEventListener('message', (event) => {
 
-  // Chargement config au démarrage
-  const STORAGE_KEY = 'wmsDashboardConfig';
-  function loadConfig() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if(stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return null;
-      }
-    }
-    return null;
+  if (!event.data || event.data.type !== 'missionsData') {
+    return;
   }
-  const config = loadConfig();
-  console.log('[Dashboard] config chargée:', config);
+
+  console.log('[Dashboard] message reçu:', event.data);
+
+  window.missionsData = Array.isArray(event.data.payload)
+    ? event.data.payload
+    : [];
+
+  console.log('[Dashboard] missions reçues:', window.missionsData.length);
+
+  if (typeof window.renderDashboard === 'function') {
+    window.renderDashboard(window.missionsData);
+  } else {
+    console.error('[Dashboard] renderDashboard non disponible');
+  }
+
+}, false);
+
+/* ===============================
+   DEBUG CONFIG
+=============================== */
+
+const STORAGE_KEY = 'wmsDashboardConfig';
+
+try {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    console.log('[Dashboard] config chargée:', JSON.parse(stored));
+  } else {
+    console.log('[Dashboard] aucune config trouvée (valeurs par défaut)');
+  }
+} catch (e) {
+  console.error('[Dashboard] erreur lecture localStorage', e);
+}
 </script>
 
+<!-- Scripts fonctionnels -->
 <script src="https://fab-404.github.io/Path/script-slider.js"></script>
 <script src="https://fab-404.github.io/Path/script-config.js"></script>
 
