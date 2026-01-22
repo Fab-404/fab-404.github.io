@@ -7,8 +7,8 @@
      ============================== */
 
   const ROWS_BY_GRID = {
-    4: 12, // 4 blocs → 12 lignes par tableau
-    6: 8,  // 6 blocs → 8 lignes
+    4: 8, // 4 blocs → 12 lignes par tableau
+    6: 4,  // 6 blocs → 8 lignes
     8: 6   // 8 blocs → 6 lignes
   };
 
