@@ -83,8 +83,15 @@ window.addEventListener('message', (event) => {
 /* ===== Handshake : dashboard prêt ===== */
 window.opener?.postMessage({ type: 'dashboardReady' }, '*');
 console.log('[Dashboard] dashboardReady envoyé');
+
+/* ===== Auto-refresh toutes les 1 minute ===== */
+setTimeout(() => {
+  console.log('[Dashboard] auto-refresh déclenché');
+  window.location.reload();
+}, 60000); // 60 000 ms = 1 minute
 </script>
 
+  
 <!-- Scripts fonctionnels -->
 <script src="https://fab-404.github.io/Path/wms-dashboard-render.js"></script>
 <script src="https://fab-404.github.io/Path/script-config.js"></script>
