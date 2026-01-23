@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard WMS</title>
+
+<link rel="stylesheet" href="https://fab-404.github.io/Path/stylev2.css" />
+</head>
+
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left"><span class="logo">WMS</span></div>
+</div>
+
+<div class="slider-container">
+  <div class="pages-wrapper" id="pages-wrapper"></div>
+</div>
+
+<div class="bottom-bar">© WMS</div>
+
+<button id="config-toggle-btn" title="Afficher / Masquer la configuration">⚙ Config</button>
+
+<div id="config-panel">
+  <label for="grids-per-page">Nombre de grilles (blocs) :</label>
+  <input type="number" id="grids-per-page" min="1" max="10" value="4" />
+
+  <label for="badges-list">Liste des badges (séparés par virgules) :</label>
+  <input type="text" id="badges-list" placeholder="ex: 0001,0002,0003" />
+
+  <button id="config-save-btn">Sauvegarder</button>
+  <div id="save-status">Configuration sauvegardée !</div>
+</div>
+
+<script>
+/* ===============================
+   INIT DASHBOARD
+=============================== */
+
+console.log('[Dashboard] page chargée');
+
+const MISSIONS_STORAGE_KEY = 'wmsDashboardMissions';
+window.missionsData = [];
+
+/* ===== Fallback localStorage (au chargement uniquement) ===== */
+(function loadFromStorageOnce() {
+  try {
+    const stored = localStorage.getItem(MISSIONS_STORAGE_KEY);
+    if (stored) {
+      window.missionsData = JSON.parse(stored);
+      console.log('[Dashboard] missions chargées depuis localStorage:', window.missionsData.length);
+    }
+  } catch (e) {
+    console.error('[Dashboard] erreur lecture localStorage', e);
+  }
+})();
+
+/* ===== Réception des données depuis WMS ===== */
+window.addEventListener('message', (event) => {
+  if (event.data?.type !== 'missionsData') return;
+
+  window.missionsData = Array.isArray(event.data.payload)
+    ? event.data.payload
+    : [];
+
+  console.log('[Dashboard] missions reçues:', window.missionsData.length);
+
+  try {
+    localStorage.setItem(
+      MISSIONS_STORAGE_KEY,
+      JSON.stringify(window.missionsData)
+    );
+  } catch (e) {
+    console.error('[Dashboard] erreur sauvegarde localStorage', e);
+  }
+
+  if (typeof window.renderDashboard === 'function') {
+    window.renderDashboard(window.missionsData);
+  }
+});
+
+/* ===== Handshake : dashboard prêt ===== */
+window.opener?.postMessage({ type: 'dashboardReady' }, '*');
+console.log('[Dashboard] dashboardReady envoyé');
+</script>
+
+<!-- Scripts fonctionnels -->
+<script src="https://fab-404.github.io/Path/wms-dashboard-render.js"></script>
+<script src="https://fab-404.github.io/Path/script-config.js"></script>
+
+</body>
+</html>
