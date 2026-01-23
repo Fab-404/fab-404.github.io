@@ -1,0 +1,141 @@
+// ==UserScript==
+// @name         WMS – Dashboard 
+// @match        file:///C:/Users/jdmor/Desktop/Nouveau%20dossier/suiviDesMissions.html*
+// @version      2026-01-23
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    let missionsData = [];
+    let dashboardWindow = null; // Référence fenêtre dashboard
+    let sendTimer = null;       // Timer envoi missions
+
+    /* ===== Interception XHR ===== */
+    const origOpen = XMLHttpRequest.prototype.open;
+    const origSend = XMLHttpRequest.prototype.send;
+
+    XMLHttpRequest.prototype.open = function (method, url) {
+        this._url = url;
+        return origOpen.apply(this, arguments);
+    };
+
+    XMLHttpRequest.prototype.send = function () {
+        this.addEventListener('load', () => {
+            if (this._url && this._url.includes('/services/mission/search')) {
+                try {
+                    const json = JSON.parse(this.responseText);
+                    missionsData = Array.isArray(json.missions) ? json.missions : [];
+                    console.log('[WMS] missions capturées:', missionsData.length);
+
+                    notifyDashboard(); // Notification mise à jour
+
+                } catch (e) {
+                    console.error('[WMS] erreur JSON', e);
+                }
+            }
+        });
+        return origSend.apply(this, arguments);
+    };
+
+    /* ===== Bouton Dashboard ===== */
+    const btn = document.createElement('button');
+    btn.textContent = 'Dashboard';
+    Object.assign(btn.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: 999999,
+        padding: '10px 16px',
+        background: '#007bff',
+        color: '#fff',
+        border: 'none',
+        cursor: 'pointer'
+    });
+    document.body.appendChild(btn);
+
+    btn.addEventListener('click', () => {
+        dashboardWindow = window.open(
+            'https://fab-404.github.io/dashboard3.html',
+            '_blank',
+            'width=1200,height=800'
+        );
+
+        if (!dashboardWindow) {
+            alert('Popup bloquée par le navigateur');
+            return;
+        }
+
+        console.log('[WMS] dashboard ouvert');
+        startSendingMissions();
+    });
+
+    // Fonction encapsulée d’envoi périodique des missions avec logs identiques
+    function startSendingMissions() {
+        if (sendTimer) {
+            clearInterval(sendTimer);
+            sendTimer = null;
+        }
+
+        let tries = 0;
+        sendTimer = setInterval(() => {
+            tries++;
+
+            if (!dashboardWindow || dashboardWindow.closed) {
+                clearInterval(sendTimer);
+                sendTimer = null;
+                return;
+            }
+
+            dashboardWindow.postMessage(
+                { type: 'missionsData', payload: missionsData },
+                '*'
+            );
+
+            console.log('[WMS] envoi missions (tentative)', tries, missionsData.length);
+
+            if (tries >= 10) {
+                clearInterval(sendTimer);
+                sendTimer = null;
+            }
+        }, 500);
+    }
+
+    // Notification au dashboard quand missionsData est mise à jour
+    function notifyDashboard() {
+        if (dashboardWindow && !dashboardWindow.closed) {
+            dashboardWindow.postMessage({ type: 'missionsUpdated' }, '*');
+            console.log('[WMS] notification mise à jour envoyée au dashboard');
+        }
+    }
+
+    /* ===== Clic automatique périodique sur "Rechercher" ===== */
+    function clickRechercher() {
+        const btns = [...document.querySelectorAll('.OM33NN-ib-r')];
+        const btnRecherche = btns.find(el => el.textContent.trim() === 'Rechercher');
+
+        const now = new Date();
+        const timeString = now.toLocaleTimeString();
+
+        if (btnRecherche) {
+            console.log(`[${timeString}] Bouton Rechercher trouvé, clic simulé`);
+            btnRecherche.click();
+
+            // Après chaque clic, relancer l’envoi missions
+            if (dashboardWindow && !dashboardWindow.closed) {
+                startSendingMissions();
+            }
+        } else {
+            console.log(`[${timeString}] Bouton Rechercher non trouvé`);
+        }
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            clickRechercher();
+            setInterval(clickRechercher, 30000);
+        }, 1000);
+    });
+
+})();
