@@ -84,14 +84,26 @@ window.addEventListener('message', (event) => {
 window.opener?.postMessage({ type: 'dashboardReady' }, '*');
 console.log('[Dashboard] dashboardReady envoyé');
 
-/* ===== Auto-refresh toutes les 1 minute ===== */
-setTimeout(() => {
+/* ===== Auto-refresh toutes les 30 sec ===== */
+/* Au chargement */
+window.addEventListener('load', () => {
+  const log = sessionStorage.getItem('lastRefreshLog');
+  if (log) {
+    console.log(log);
+    sessionStorage.removeItem('lastRefreshLog');
+  }
+});
+
+/* Toutes les 30 secondes */
+setInterval(() => {
   const now = new Date();
   const timeString = now.toLocaleTimeString();
-  console.log(`[${timeString}] [Dashboard] auto-refresh déclenché`);
-  window.location.reload();
-}, 30000); // 30 000 ms = 30 secondes
 
+  // Stocker l'heure dans sessionStorage avant reload
+  sessionStorage.setItem('lastRefreshLog', `[${timeString}] [Dashboard] auto-refresh déclenché`);
+
+  window.location.reload();
+}, 30000);
 </script>
   
 <!-- Scripts fonctionnels -->
