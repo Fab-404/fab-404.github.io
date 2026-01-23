@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard WMS</title>
+
+<link rel="stylesheet" href="https://fab-404.github.io/Path/style.css" />
+<link rel="stylesheet" href="https://fab-404.github.io/Path/config-style.css" />
+</head>
+
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left"><span class="logo">WMS</span></div>
+</div>
+
+<div class="slider-container">
+  <div class="pages-wrapper" id="pages-wrapper"></div>
+</div>
+
+<div class="bottom-bar">© WMS</div>
+
+<!-- Bouton config -->
+<button id="config-toggle-btn" title="Afficher / Masquer la configuration">⚙ Config</button>
+
+<!-- Panneau config -->
+<div id="config-panel">
+  <label for="grids-per-page">Nombre de grilles (blocs) :</label>
+  <input type="number" id="grids-per-page" min="1" max="10" value="4" />
+
+  <label for="badges-list">Liste des badges (séparés par virgules) :</label>
+  <input type="text" id="badges-list" placeholder="ex: 0001,0002,0003" />
+
+  <button id="config-save-btn">Sauvegarder</button>
+  <div id="save-status">Configuration sauvegardée !</div>
+</div>
+
+<script>
+console.debug('[Dashboard] page chargée');
+
+// Stockage global des missions
+window.missionsData = [];
+
+// Reception données initiales et notifications mises à jour
+window.addEventListener('message', (event) => {
+
+  if (!event.data) return;
+
+  if (event.data.type === 'missionsData') {
+    console.debug('[Dashboard] données initiales reçues:', event.data.payload.length);
+    window.missionsData = Array.isArray(event.data.payload) ? event.data.payload : [];
+    if (typeof window.renderDashboard === 'function') {
+      window.renderDashboard(window.missionsData);
+    } else {
+      console.error('[Dashboard] renderDashboard non disponible');
+    }
+  }
+
+  if (event.data.type === 'missionsUpdated') {
+    console.debug('[Dashboard] notification mise à jour reçue, rafraîchissement page');
+    location.reload();
+  }
+
+}, false);
+
+/* ===============================
+   DEBUG CONFIG
+=============================== */
+
+const STORAGE_KEY = 'wmsDashboardConfig';
+
+try {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    console.debug('[Dashboard] config chargée:', JSON.parse(stored));
+  } else {
+    console.debug('[Dashboard] aucune config trouvée (valeurs par défaut)');
+  }
+} catch (e) {
+  console.error('[Dashboard] erreur lecture localStorage', e);
+}
+</script>
+
+<!-- Scripts fonctionnels -->
+<script src="https://fab-404.github.io/Path/script-slider.js"></script>
+<script src="https://fab-404.github.io/Path/script-config.js"></script>
+
+</body>
+</html>
