@@ -1,0 +1,26 @@
+participant WMS_User_Browser
+participant Tampermonkey_PIP
+participant Backend_Service
+participant Dashboard_Window
+
+WMS_User_Browser -> Tampermonkey_PIP : Chargement page WMS
+Tampermonkey_PIP -> Backend_Service : Interception requête XHR /services/mission/search (via navigateur)
+Backend_Service --> Tampermonkey_PIP : Réponse JSON missions
+Tampermonkey_PIP -> Tampermonkey_PIP : Stocke missionsData en RAM
+Tampermonkey_PIP -> WMS_User_Browser : Simule clic "Rechercher" toutes les 30s
+
+WMS_User_Browser -> Tampermonkey_PIP : Clique bouton "Dashboard"
+Tampermonkey_PIP -> Dashboard_Window : Ouvre fenêtre popup (dashboard.html)
+
+Dashboard_Window -> Tampermonkey_PIP : Envoi message "dashboardReady"
+
+alt Dashboard prêt
+    Tampermonkey_PIP -> Dashboard_Window : Envoie missionsData via postMessage
+end
+
+Backend_Service --> Tampermonkey_PIP : Nouvelle réponse XHR missions (via clic simule)
+Tampermonkey_PIP -> Tampermonkey_PIP : Met à jour missionsData en RAM
+Tampermonkey_PIP -> Dashboard_Window : Envoie missionsData mises à jour via postMessage
+
+Dashboard_Window -> Dashboard_Window : Stocke missionsData en RAM + localStorage
+Dashboard_Window -> Utilisateur : Affiche dashboard mis à jour (dynamique, sans reload)
