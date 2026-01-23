@@ -1,0 +1,79 @@
+# README - Dashboard WMS avec Tampermonkey (PIP) et Synchronisation des données
+
+## Objectif  
+Fournir une interface de dashboard externe pour le WMS, affichant en temps quasi réel les missions issues du service central `/services/mission/search`. Le projet repose sur un script Tampermonkey injecté sur le poste WMS principal, et une page dashboard HTML indépendante, reliée via `postMessage`.
+
+---
+
+## Architecture & Flux de données
+
+### 1. Tampermonkey (PIP)
+- Injecté dans le navigateur du poste principal WMS.
+- Intercepte toutes les requêtes XHR vers `/services/mission/search`.
+- Analyse la réponse JSON pour extraire les données des missions.
+- Stocke temporairement les données en **mémoire RAM** (variable JS `missionsData`).
+- Offre un bouton pour ouvrir le dashboard (fenêtre popup).
+- À la réception d’un message `dashboardReady` du dashboard, pousse les données actuelles via `postMessage`.
+- Simule un clic toutes les **30 secondes** sur le bouton « Rechercher » dans le WMS pour forcer la mise à jour du flux WMS (rafraîchissement sans rechargement complet).
+- Lors de l’ouverture du dashboard, envoie les données une première fois via `postMessage`.
+- Par la suite, il envoie les données au dashboard uniquement en réponse aux mises à jour capturées via XHR.
+
+### 2. Dashboard (dashboard.html)
+- Page HTML indépendante chargée dans une fenêtre popup.
+- Stocke les données reçues en mémoire (`window.missionsData`).
+- Sauvegarde ces données dans le `localStorage` du navigateur (`wmsDashboardMissions`) pour persistance.
+- Au chargement, restaure les données depuis `localStorage`.
+- N’effectue **aucun rechargement automatique** de la page.
+- Réagit uniquement aux messages `postMessage` envoyés par le PIP pour rafraîchir dynamiquement l’affichage.
+
+---
+
+## Stockage des données
+
+| Contexte           | Stockage                      | Durée de vie                   | Utilité                              |
+|--------------------|------------------------------|-------------------------------|------------------------------------|
+| PIP (Tampermonkey) | Variable JS (RAM)             | Session navigateur (volatile) | Support pour envoyer les données au dashboard |
+| Dashboard (popup)   | Variable JS (RAM) + localStorage | RAM volatile + persistance locale | Permet rechargement rapide et restauration en cas de crash |
+
+- **RAM** : stockage dynamique et temporaire dans des variables JS.
+- **localStorage** : stockage persistant côté dashboard, propre au navigateur.
+
+---
+
+## Synchronisation & Rafraîchissement
+
+- Le PIP simule un clic sur le bouton "Rechercher" dans le WMS toutes les **30 secondes** pour forcer la mise à jour du flux WMS.
+- Le PIP envoie les données au dashboard **immédiatement à l’ouverture** et ensuite **à chaque interception réussie de nouvelles données** (XHR vers `/services/mission/search`).
+- Le dashboard ne recharge pas sa page HTML automatiquement, il se met à jour uniquement à la réception des données via `postMessage`.
+- Cette double synchronisation assure que :
+  - Le WMS interroge le backend toutes les 30 secondes (via clic simulé).
+  - Le dashboard reçoit une mise à jour dynamique à chaque changement sans rechargement complet.
+
+---
+
+## Sécurité & Portabilité
+
+- Aucune donnée sensible n’est stockée en clair sur un serveur web.
+- Le dashboard est chargé depuis un serveur externe (GitHub Pages), mais ne conserve que les données stockées localement dans `localStorage`.
+- Toutes les données transitent uniquement en mémoire via `postMessage`.
+- Le projet reste local à l’infrastructure de l’entreprise, sans serveur tiers.
+
+---
+
+## Points techniques clés
+
+- Interception XHR via override des méthodes `open` et `send` de `XMLHttpRequest`.
+- Communication inter-fenêtres avec `window.postMessage` et écoute des événements `message`.
+- Simulation du clic utilisateur toutes les 30 secondes pour forcer la mise à jour côté WMS.
+- Pas de reload automatique de la page dashboard.
+- Usage de `localStorage` pour résilience côté dashboard.
+
+---
+
+## Ressources & Code source
+
+- https://raw.githubusercontent.com/Fab-404/fab-404.github.io/refs/heads/main/dashboard3.html  
+- https://raw.githubusercontent.com/Fab-404/fab-404.github.io/refs/heads/main/Tampermonkey/Dash_230126  
+- https://raw.githubusercontent.com/Fab-404/fab-404.github.io/refs/heads/main/Path/wms-dashboard-render.js  
+- https://raw.githubusercontent.com/Fab-404/fab-404.github.io/refs/heads/main/Path/script-config.js  
+- https://raw.githubusercontent.com/Fab-404/fab-404.github.io/refs/heads/main/Path/style.css  
