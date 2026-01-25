@@ -73,7 +73,7 @@ body {
   border: 1px solid #aaa;
   padding: 4px 6px;
   text-align: center;
-  font-weight: normal;
+  font-weight: 600 !important;
   height: auto; /* auto laisse le tr s’adapter */
 }
 
