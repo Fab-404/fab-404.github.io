@@ -9,7 +9,8 @@
  const ROWS_BY_GRID = {
  4: 8,
  6: 4,
- 8: 4
+ 8: 4,
+ 10: 4
  };
 
  const DEFAULT_ROWS = 10;
