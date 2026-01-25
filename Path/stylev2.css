@@ -94,11 +94,11 @@ body {
 /* ===== EN-TÊTE BADGE/NOM - Personnalisation de l'affichage ===== */
 .missions-table th.badge-header {
     width: 100% !important;
-    background-color:  #00ff00;
+    background-color:  #ffffff;
     font-size: 16px !important;
     font-weight: 600 !important;
-    color: white !important;
-    padding: 0px 10x !important;
+    color: black !important;
+    padding: 0px 0xp !important;
     text-align: center !important;
     z-index: 1;
 }
