@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard WMS</title>
+
+<link rel="stylesheet" href="https://fab-404.github.io/Path/style.css" />
+<link rel="stylesheet" href="https://fab-404.github.io/Path/config-style.css" />
+</head>
+
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left"><span class="logo">WMS</span></div>
+</div>
+
+<div class="slider-container">
+  <div class="pages-wrapper" id="pages-wrapper"></div>
+</div>
+
+<!-- <div class="bottom-bar">© WMS</div> -->
+
+<!-- Bouton config -->
+<button id="config-toggle-btn" title="Afficher / Masquer la configuration">⚙ Config</button>
+
+<!-- Panneau config -->
+<div id="config-panel">
+  <label for="grids-per-page">Nombre de grilles (blocs) :</label>
+  <input type="number" id="grids-per-page" min="1" max="10" value="4" />
+
+  <label for="badges-list">Liste des badges (séparés par virgules) :</label>
+  <input type="text" id="badges-list" placeholder="ex: 0001,0002,0003" />
+
+  <button id="config-save-btn">Sauvegarder</button>
+  <div id="save-status">Configuration sauvegardée !</div>
+</div>
+
+<script>
+console.debug('[Dashboard] page chargée');
+
+// Stockage global des missions
+window.missionsData = [];
+
+// Reception données initiales et notifications mises à jour
+window.addEventListener('message', (event) => {
+
+  if (!event.data) return;
+
+  if (event.data.type === 'missionsData') {
+    console.debug('[Dashboard] données initiales reçues:', event.data.payload.length);
+    window.missionsData = Array.isArray(event.data.payload) ? event.data.payload : [];
+    if (typeof window.renderDashboard === 'function') {
+      window.renderDashboard(window.missionsData);
+    } else {
+      console.error('[Dashboard] renderDashboard non disponible');
+    }
+  }
+
+  if (event.data.type === 'missionsUpdated') {
+    console.debug('[Dashboard] notification mise à jour reçue, rafraîchissement page');
+    location.reload();
+  }
+
+}, false);
+
+/* ===============================
+   DEBUG CONFIG
+=============================== */
+
+const STORAGE_KEY = 'wmsDashboardConfig';
+
+try {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    console.debug('[Dashboard] config chargée:', JSON.parse(stored));
+  } else {
+    console.debug('[Dashboard] aucune config trouvée (valeurs par défaut)');
+  }
+} catch (e) {
+  console.error('[Dashboard] erreur lecture localStorage', e);
+}
+</script>
+
+<!-- Scripts fonctionnels -->
+<script src="https://fab-404.github.io/Path/script-slider.js"></script>
+<script src="https://fab-404.github.io/Path/script-config.js"></script>
+
+<!-- Script pour afficher les stats WMS depuis localStorage -->
+<script>
+  console.debug('[Dashboard] chargement des stats depuis localStorage');
+
+  function loadStoredProgress() {
+    try {
+      const raw = localStorage.getItem('wmsLatestProgress');
+      if (!raw) {
+        console.warn('Aucune donnée WMS trouvée dans localStorage');
+        return null;
+      }
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error('Erreur parsing localStorage WMS', e);
+      return null;
+    }
+  }
+
+  function createProgressTable(data) {
+    if (!data) return;
+
+    // Conteneur d’affichage
+    const container = document.createElement('div');
+    container.style.margin = '20px';
+    container.style.padding = '10px';
+    container.style.border = '1px solid #ccc';
+    container.style.background = '#f9f9f9';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.fontSize = '14px';
+    container.style.maxWidth = '600px';
+
+    // Titre
+    const title = document.createElement('h2');
+    title.textContent = 'Progression des Tournées (localStorage)';
+    container.appendChild(title);
+
+    // Table
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+
+    // Header
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr style="background:#ddd;">
+        <th style="padding:8px; text-align:left;">Base</th>
+        <th style="padding:8px; text-align:center;">UL terminées</th>
+        <th style="padding:8px; text-align:center;">UL totales</th>
+        <th style="padding:8px; text-align:center;">R.A.F</th>
+        <th style="padding:8px; text-align:center;">%</th>
+      </tr>`;
+    table.appendChild(thead);
+
+    // Body
+    const tbody = document.createElement('tbody');
+
+    // Calcul global
+    const bases = Object.keys(data);
+    let globalTotal = 0, globalTermine = 0;
+    bases.forEach(b => {
+      globalTotal += data[b].total;
+      globalTermine += data[b].termine;
+    });
+    const globalRaf = globalTotal - globalTermine;
+    const globalPercent = globalTotal ? ((globalTermine / globalTotal) * 100).toFixed(1) : '0.0';
+
+    // Ligne global
+    const trGlobal = document.createElement('tr');
+    trGlobal.style.background = '#cfe2ff';
+    trGlobal.style.fontWeight = 'bold';
+    trGlobal.innerHTML = `
+      <td style="padding:8px;">GLOBAL</td>
+      <td style="padding:8px; text-align:center;">${globalTermine}</td>
+      <td style="padding:8px; text-align:center;">${globalTotal}</td>
+      <td style="padding:8px; text-align:center;">${globalRaf}</td>
+      <td style="padding:8px; text-align:center;">${globalPercent}%</td>`;
+    tbody.appendChild(trGlobal);
+
+    // Lignes par base
+    bases.forEach(b => {
+      const d = data[b];
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid #ccc';
+      tr.innerHTML = `
+        <td style="padding:8px;">${b}</td>
+        <td style="padding:8px; text-align:center;">${d.termine}</td>
+        <td style="padding:8px; text-align:center;">${d.total}</td>
+        <td style="padding:8px; text-align:center;">${d.raf}</td>
+        <td style="padding:8px; text-align:center;">${d.percent}%</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+
+    // Ajout dans la page sous la div pages-wrapper
+    const target = document.getElementById('pages-wrapper');
+    if (target) {
+      target.insertAdjacentElement('afterend', container);
+    } else {
+      document.body.appendChild(container);
+    }
+  }
+
+  // Chargement + affichage
+  const storedStats = loadStoredProgress();
+  createProgressTable(storedStats);
+</script>
+
+</body>
+</html>
