@@ -111,31 +111,19 @@ function renderBasesSummary(stats) {
     bubble.className = 'base-bubble';
 
     bubble.innerHTML = `
-      <div class="base-name">${base}</div>
-      <div class="base-percent">${d.percent}%</div>
-      <div class="base-line">${d.termine} / ${d.total} &nbsp; RAF : ${d.raf}</div>
+      <div class="base-header">
+        <div class="base-name">${base}</div>
+        <div class="base-percent">${d.percent}%</div>
+      </div>
+      <div class="base-line">
+        <div class="done-total">${d.termine} / ${d.total}</div>
+        <div class="raf-count">RAF : ${d.raf}</div>
+      </div>
     `;
 
     container.appendChild(bubble);
   });
 }
-
-/* =========================
-   SOURCE DONNÉES (TEMP)
-========================= */
-
-// 👉 Simulation locale (à remplacer plus tard)
-const MOCK_STATS = {
-  "60BEZ": { total: 120, termine: 90, raf: 30, percent: 75 },
-  "61ANG": { total: 80, termine: 50, raf: 30, percent: 62.5 },
-  "60MON": { total: 60, termine: 60, raf: 0, percent: 100 },
-  "60CAS": { total: 40, termine: 10, raf: 30, percent: 25 },
-  "60ANG": { total: 100, termine: 20, raf: 80, percent: 20 }
-};
-
-// rendu initial
-renderBasesSummary(MOCK_STATS);
-
   
 </script>
   
