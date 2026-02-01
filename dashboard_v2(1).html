@@ -165,8 +165,10 @@ function renderStats(stats) {
           </div>
           <span class="stat-percent">${s.percent}%</span>
         </div>
-        <div class="stat-raf">RAF: ${s.raf} colis</div>
-        <div class="stat-cutoff">Cut off ${cutoff}</div>
+        <div class="stat-raf-cutoff">
+          <div class="stat-raf">RAF: ${s.raf} colis</div>
+          <div class="stat-cutoff">Cut off ${cutoff}</div>
+        </div>
       </div>
     `;
   });
