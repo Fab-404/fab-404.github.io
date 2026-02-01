@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard WMS</title>
+
+<link rel="stylesheet" href="https://fab-404.github.io/Path/stylev2.css" />
+</head>
+
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <!-- Résumé bases -->
+    <div id="bases-summary" class="bases-summary">
+      <span style="opacity: 0.6; font-size: 12px;">Chargement des stats...</span>
+    </div>
+  </div>
+</div>
+
+
+<div class="slider-container">
+  <div class="pages-wrapper" id="pages-wrapper"></div>
+</div>
+
+<!-- <div class="bottom-bar">© WMS</div> -->
+
+<button id="config-toggle-btn" title="Afficher / Masquer la configuration">⚙ Config</button>
+
+<div id="config-panel">
+  <label for="grids-per-page">Nombre de grilles (blocs) :</label>
+  <input type="number" id="grids-per-page" min="1" max="10" value="4" />
+
+  <label for="badges-list">Liste des badges (séparés par virgules) :</label>
+  <input type="text" id="badges-list" placeholder="ex: 0001,0002,0003" />
+
+  <button id="config-save-btn">Sauvegarder</button>
+  <div id="save-status">Configuration sauvegardée !</div>
+</div>
+
+<script>
+/* ===============================
+   INIT DASHBOARD
+=============================== */
+
+console.log('[Dashboard] page chargée');
+
+const MISSIONS_STORAGE_KEY = 'wmsDashboardMissions';
+const STATS_STORAGE_KEY = 'wmsDashboardStats';
+
+window.missionsData = [];
+window.statsData = {};
+
+/* ===== Fallback localStorage (au chargement uniquement) ===== */
+(function loadFromStorageOnce() {
+  try {
+    const stored = localStorage.getItem(MISSIONS_STORAGE_KEY);
+    if (stored) {
+      window.missionsData = JSON.parse(stored);
+      console.log('[Dashboard] missions chargées depuis localStorage:', window.missionsData.length);
+    }
+
+    const storedStats = localStorage.getItem(STATS_STORAGE_KEY);
+    if (storedStats) {
+      window.statsData = JSON.parse(storedStats);
+      console.log('[Dashboard] stats chargées depuis localStorage');
+      renderBasesSummary(window.statsData);
+    }
+  } catch (e) {
+    console.error('[Dashboard] erreur lecture localStorage', e);
+  }
+})();
+
+/* ===== Réception des données depuis WMS ===== */
+window.addEventListener('message', (event) => {
+  if (!event.data?.type) return;
+
+  // Réception des MISSIONS
+  if (event.data.type === 'missionsData') {
+    window.missionsData = Array.isArray(event.data.payload) ? event.data.payload : [];
+    console.log('[Dashboard] missions reçues:', window.missionsData.length);
+
+    try {
+      localStorage.setItem(MISSIONS_STORAGE_KEY, JSON.stringify(window.missionsData));
+    } catch (e) {
+      console.error('[Dashboard] erreur sauvegarde missions localStorage', e);
+    }
+
+    if (typeof window.renderDashboard === 'function') {
+      window.renderDashboard(window.missionsData);
+    }
+  }
+
+  // Réception des STATS
+  if (event.data.type === 'statsData') {
+    window.statsData = event.data.payload || {};
+    console.log('[Dashboard] stats reçues:', Object.keys(window.statsData).length, 'tournées');
+
+    try {
+      localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(window.statsData));
+    } catch (e) {
+      console.error('[Dashboard] erreur sauvegarde stats localStorage', e);
+    }
+
+    renderBasesSummary(window.statsData);
+  }
+});
+
+/* ===== Handshake : dashboard prêt ===== */
+window.opener?.postMessage({ type: 'dashboardReady' }, '*');
+console.log('[Dashboard] dashboardReady envoyé');
+
+/* ===== Debug log toutes les 30 sec sans reload ===== */
+setInterval(() => {
+  const now = new Date();
+  const timeString = now.toLocaleTimeString();
+  console.log(`[${timeString}] [Dashboard] debug - tick 30s - missions: ${window.missionsData.length}, stats: ${Object.keys(window.statsData).length}`);
+}, 30000);
+
+
+/* =========================
+   BASES – RENDER
+========================= */
+
+function renderBasesSummary(stats) {
+  const container = document.getElementById('bases-summary');
+  if (!container) {
+    console.warn('[Dashboard] conteneur bases-summary introuvable');
+    return;
+  }
+
+  if (!stats || Object.keys(stats).length === 0) {
+    container.innerHTML = '<span style="opacity: 0.6; font-size: 12px;">Aucune stat disponible</span>';
+    return;
+  }
+
+  container.innerHTML = '';
+
+  Object.entries(stats).forEach(([base, d]) => {
+    const bubble = document.createElement('div');
+    bubble.className = 'base-bubble';
+
+    bubble.innerHTML = `
+      <div class="base-header">
+        <div class="base-name">${base}</div>
+        <div class="base-percent">${d.percent}%</div>
+      </div>
+      <div class="base-line">
+        <div class="done-total">${d.termine} / ${d.total}</div>
+        <div class="raf-count">RAF : ${d.raf}</div>
+      </div>
+    `;
+
+    container.appendChild(bubble);
+  });
+
+  console.log('[Dashboard] stats affichées dans la top bar:', Object.keys(stats).length, 'tournées');
+}
+  
+</script>
+  
+<!-- Scripts fonctionnels -->
+<script src="https://fab-404.github.io/Path/wms-dashboard-render.js"></script>
+<script src="https://fab-404.github.io/Path/script-config.js"></script>
+
+</body>
+</html>
