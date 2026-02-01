@@ -303,6 +303,18 @@ body {
   margin-left: auto;
 }
 
+
+.stat-raf-cutoff {
+  display: flex;
+  gap: 10px; /* espace entre les deux */
+  font-size: 11px;
+  opacity: 0.85;
+  font-weight: 600;
+  color: #FFB74D; /* Tu peux ajuster ou garder la couleur pour chaque div */
+}
+
+
+
 .stat-raf {
   font-size: 11px;
   opacity: 0.85;
