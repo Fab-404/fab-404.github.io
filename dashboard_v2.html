@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard WMS V2</title>
+
+<link rel="stylesheet" href="https://fab-404.github.io/Path/style.css" />
+<style>
+/* ===== STYLES STATS TOP BAR ===== */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  font-size: 13px;
+  color: #fff;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stat-label {
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #4CAF50;
+}
+
+.stat-progress {
+  width: 60px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stat-progress-bar {
+  height: 100%;
+  background: #4CAF50;
+  transition: width 0.5s ease;
+}
+
+.stat-global {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.stat-global .stat-value {
+  color: #8BC34A;
+  font-size: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <span class="logo">WMS</span>
+  </div>
+  <div class="stats-bar" id="stats-bar">
+    <!-- Les stats seront injectées ici -->
+    <span style="opacity: 0.6;">Chargement des stats...</span>
+  </div>
+</div>
+
+<div class="slider-container">
+  <div class="pages-wrapper" id="pages-wrapper"></div>
+</div>
+
+<!-- Bouton config -->
+<button id="config-toggle-btn" title="Afficher / Masquer la configuration">⚙ Config</button>
+
+<!-- Panneau config -->
+<div id="config-panel">
+  <label for="grids-per-page">Nombre de grilles (blocs) :</label>
+  <input type="number" id="grids-per-page" min="1" max="10" value="4" />
+
+  <label for="badges-list">Liste des badges (séparés par virgules) :</label>
+  <input type="text" id="badges-list" placeholder="ex: 0001,0002,0003" />
+
+  <button id="config-save-btn">Sauvegarder</button>
+  <div id="save-status">Configuration sauvegardée !</div>
+</div>
+
+<script>
+/* ===============================
+   INIT DASHBOARD
+=============================== */
+
+console.log('[Dashboard V2] page chargée');
+
+const MISSIONS_STORAGE_KEY = 'wmsDashboardMissions';
+const STATS_STORAGE_KEY = 'wmsDashboardStats';
+
+window.missionsData = [];
+window.statsData = {};
+
+/* ===== Fallback localStorage (au chargement uniquement) ===== */
+(function loadFromStorageOnce() {
+  try {
+    const storedMissions = localStorage.getItem(MISSIONS_STORAGE_KEY);
+    if (storedMissions) {
+      window.missionsData = JSON.parse(storedMissions);
+      console.log('[Dashboard V2] missions chargées depuis localStorage:', window.missionsData.length);
+    }
+    
+    const storedStats = localStorage.getItem(STATS_STORAGE_KEY);
+    if (storedStats) {
+      window.statsData = JSON.parse(storedStats);
+      console.log('[Dashboard V2] stats chargées depuis localStorage');
+      renderStats(window.statsData);
+    }
+  } catch (e) {
+    console.error('[Dashboard V2] erreur lecture localStorage', e);
+  }
+})();
+
+/* ===== Réception des données depuis WMS ===== */
+window.addEventListener('message', (event) => {
+  if (!event.data?.type) return;
+
+  // Réception des MISSIONS
+  if (event.data.type === 'missionsData') {
+    window.missionsData = Array.isArray(event.data.payload) ? event.data.payload : [];
+    console.log('[Dashboard V2] missions reçues:', window.missionsData.length);
+
+    try {
+      localStorage.setItem(MISSIONS_STORAGE_KEY, JSON.stringify(window.missionsData));
+    } catch (e) {
+      console.error('[Dashboard V2] erreur sauvegarde missions localStorage', e);
+    }
+
+    if (typeof window.renderDashboard === 'function') {
+      window.renderDashboard(window.missionsData);
+    }
+  }
+
+  // Réception des STATS
+  if (event.data.type === 'statsData') {
+    window.statsData = event.data.payload || {};
+    console.log('[Dashboard V2] stats reçues:', Object.keys(window.statsData).length, 'tournées');
+
+    try {
+      localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(window.statsData));
+    } catch (e) {
+      console.error('[Dashboard V2] erreur sauvegarde stats localStorage', e);
+    }
+
+    renderStats(window.statsData);
+  }
+});
+
+/* ===== Rendu des stats dans la top bar ===== */
+function renderStats(stats) {
+  const container = document.getElementById('stats-bar');
+  if (!container) return;
+
+  if (!stats || Object.keys(stats).length === 0) {
+    container.innerHTML = '<span style="opacity: 0.6;">Aucune stat disponible</span>';
+    return;
+  }
+
+  let html = '';
+
+  // Afficher GLOBAL en premier si disponible
+  if (stats.GLOBAL) {
+    const g = stats.GLOBAL;
+    html += `
+      <div class="stat-item stat-global">
+        <span class="stat-label">GLOBAL</span>
+        <span class="stat-value">${g.termine}/${g.total}</span>
+        <div class="stat-progress">
+          <div class="stat-progress-bar" style="width: ${g.percent}%"></div>
+        </div>
+        <span class="stat-value">${g.percent}%</span>
+      </div>
+    `;
+  }
+
+  // Afficher chaque tournée (sauf GLOBAL)
+  Object.keys(stats).forEach(tournee => {
+    if (tournee === 'GLOBAL') return;
+    
+    const s = stats[tournee];
+    html += `
+      <div class="stat-item">
+        <span class="stat-label">${tournee}</span>
+        <span class="stat-value">${s.termine}/${s.total}</span>
+        <div class="stat-progress">
+          <div class="stat-progress-bar" style="width: ${s.percent}%"></div>
+        </div>
+        <span style="font-size: 11px; opacity: 0.8;">${s.percent}%</span>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  console.log('[Dashboard V2] stats affichées dans la top bar');
+}
+
+/* ===== Handshake : dashboard prêt ===== */
+window.opener?.postMessage({ type: 'dashboardReady' }, '*');
+console.log('[Dashboard V2] dashboardReady envoyé');
+
+/* ===== Debug log toutes les 30 sec ===== */
+setInterval(() => {
+  const now = new Date();
+  const timeString = now.toLocaleTimeString();
+  console.log(`[${timeString}] [Dashboard V2] debug - tick 30s - missions: ${window.missionsData.length}, stats: ${Object.keys(window.statsData).length}`);
+}, 30000);
+</script>
+  
+<!-- Scripts fonctionnels -->
+<script src="https://fab-404.github.io/Path/wms-dashboard-render.js"></script>
+<script src="https://fab-404.github.io/Path/script-config.js"></script>
+
+</body>
+</html>
