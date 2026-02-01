@@ -232,112 +232,105 @@ body {
 /* =========================
    TOP BAR
 ========================= */
-
 .top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 70px;
-  background: #1e1e1e;
+  height: auto !important;
+  min-height: 80px;
+  padding: 10px 0;
+}
+
+.stats-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 0 20px;
+  font-size: 12px;
   color: #fff;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  z-index: 1000;
+  flex-wrap: wrap;
 }
 
-/* =========================
-   BASES SUMMARY
-========================= */
-
-.bases-summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* =========================
-   BASE BUBBLE
-========================= */
-
-.base-bubble {
-  background: #2a2a2a;
-  border-radius: 8px;
-  padding: 8px 14px;
-  min-width: 95px;
+.stat-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  box-shadow: inset 0 0 0 1px #3a3a3a;
-  color: #eee;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: background 0.3s;
+  min-width: 160px;
 }
 
-/* =========================
-   HEADER : BASE + POURCENTAGE
-========================= */
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
-.base-header {
+.stat-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-weight: 700;
-  font-size: 12px;
-  color: #4caf50;
+  gap: 8px;
+  margin-bottom: 2px;
 }
 
-.base-name {
-  flex: 1;
+.stat-label {
   font-weight: 700;
-  font-size: 12px;
-  color: #e0e0e0;
+  font-size: 13px;
+  opacity: 0.9;
 }
 
-.base-percent {
+.stat-value {
   font-weight: 700;
-  font-size: 12px;
-  color: #4caf50;
-  white-space: nowrap;
+  color: #4CAF50;
+  font-size: 14px;
 }
 
-/* =========================
-   LINE 2 : DONE / TOTAL + RAF
-========================= */
+.stat-progress {
+  width: 80px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
 
-.base-line {
-  display: flex;
-  justify-content: space-between;
+.stat-progress-bar {
+  height: 100%;
+  background: #4CAF50;
+  transition: width 0.5s ease;
+}
+
+.stat-percent {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8BC34A;
+  margin-left: auto;
+}
+
+.stat-raf {
   font-size: 11px;
-  color: #ccc;
-}
-
-.done-total {
+  opacity: 0.85;
+  color: #FFB74D;
   font-weight: 600;
-  color: #fff;
 }
 
-.raf-count {
-  font-weight: 600;
-  color: #ff9800;
-  white-space: nowrap;
+.stat-cutoff {
+  font-size: 11px;
+  opacity: 0.75;
+  color: #90CAF9;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 1200px) {
-  .base-bubble {
-    min-width: 85px;
-    padding: 6px 10px;
-  }
-
-  .base-name, .base-percent, .done-total, .raf-count {
-    font-size: 10px;
-  }
-
-  .base-line {
-    font-size: 10px;
-  }
+.stat-global {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  min-width: 180px;
 }
 
+.stat-global .stat-label {
+  font-size: 14px;
+}
+
+.stat-global .stat-value {
+  color: #8BC34A;
+  font-size: 16px;
+}
+
+.stat-global .stat-percent {
+  font-size: 16px;
+}
