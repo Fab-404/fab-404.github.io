@@ -1,0 +1,349 @@
+/* ---------- Reset et base ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #222;
+  background: #f5f5f5;
+  line-height: 1.5;
+  padding-top: 56px; /* top bar */
+  padding-bottom: 40px; /* footer */
+}
+
+/* ---------- Barres fixes ---------- */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 56px;
+  background: #42434d;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+}
+
+.top-bar a {
+  color: #fff;
+  margin-left: 20px;
+  text-decoration: none;
+}
+
+.top-bar a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Grille principale (responsive) ---------- */
+.grid-main {
+  margin-top:20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 colonnes */
+  gap: 16px;
+  padding: 16px;
+  height: auto; /* auto permet l’adaptation au contenu */
+  align-items: start;
+}
+
+/* ---------- Bloc ---------- */
+.bloc {
+  background: #fff;
+  border: 0px solid #ccc;
+  padding: 0px;
+  height: auto; /* important */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Tableaux ---------- */
+.missions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed; /* colonnes fixes */
+}
+
+.missions-table th,
+.missions-table td {
+  border: 1px solid #aaa;
+  padding: 4px 6px;
+  text-align: center;
+  font-weight: 600 !important;
+  height: auto; /* auto laisse le tr s’adapter */
+}
+
+.missions-table th {
+  background-color: #0067b8;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 600;
+}
+
+/* alterner couleurs lignes */
+.missions-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* ===== EN-TÊTE BADGE/NOM - Personnalisation de l'affichage ===== */
+.missions-table th.badge-header {
+    width: 100% !important;
+    background-color:  #ffffff;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: black !important;
+    padding: 0px 0xp !important;
+    text-align: center !important;
+    z-index: 1;
+}
+
+/* ---------- Footer ---------- */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: #1e1e1e;
+  color: #2d99f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  z-index: 1000;
+}
+
+/* ---------- Slider & pages ---------- */
+.slider-container {
+  overflow: hidden;
+  position: relative;
+  height: auto; /* auto pour s’adapter à contenu */
+}
+
+#pages-wrapper {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s ease;
+}
+
+/* ---------- Contrôles ------------ */
+.slider-controls {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 120px;
+  z-index: 1000;
+}
+
+.slider-controls button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #5caece;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.slider-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#pageNumber {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #222;
+  font-weight: bold;
+  z-index: 1001;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px 12px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* config-style */
+
+#config-toggle-btn {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    z-index: 10000;
+    padding: 8px 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+}
+#config-panel {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 320px;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    padding: 15px;
+    display: none;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+}
+#config-panel label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+#config-panel input[type="number"],
+#config-panel input[type="text"] {
+    width: 100%;
+    padding: 6px 8px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+#config-save-btn {
+    background: #28a745;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 600;
+}
+#save-status {
+    margin-top: 8px;
+    color: green;
+    display: none;
+}
+
+
+/* =========================
+   TOP BAR
+========================= */
+.top-bar {
+  height: auto !important;
+  min-height: 80px;
+  padding: 10px 0;
+}
+
+.stats-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 0 20px;
+  font-size: 12px;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: background 0.3s;
+  min-width: 160px;
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.stat-label {
+  font-weight: 700;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #4CAF50;
+  font-size: 14px;
+}
+
+.stat-progress {
+  width: 30px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stat-progress-bar {
+  height: 100%;
+  background: #4CAF50;
+  transition: width 0.5s ease;
+}
+
+.stat-percent {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8BC34A;
+  margin-left: auto;
+}
+
+
+.stat-raf-cutoff {
+  display: flex;
+  gap: 10px; /* espace entre les deux */
+  font-size: 11px;
+  opacity: 0.85;
+  font-weight: 600;
+  color: #FFB74D; /* Tu peux ajuster ou garder la couleur pour chaque div */
+}
+
+
+
+.stat-raf {
+  font-size: 11px;
+  opacity: 0.85;
+  color: #FFB74D;
+  font-weight: 600;
+}
+
+.stat-cutoff {
+  font-size: 11px;
+  opacity: 0.75;
+  color: #90CAF9;
+}
+
+.stat-global {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  min-width: 180px;
+}
+
+.stat-global .stat-label {
+  font-size: 14px;
+}
+
+.stat-global .stat-value {
+  color: #8BC34A;
+  font-size: 16px;
+}
+
+.stat-global .stat-percent {
+  font-size: 16px;
+}
