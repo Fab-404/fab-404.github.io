@@ -121,7 +121,7 @@ function clickRechercher() {
 window.addEventListener('load', () => {
   setTimeout(() => {
     clickRechercher();
-    setInterval(clickRechercher, 30000);
+    setInterval(clickRechercher, 5000);
   }, 1000);
 });
 })();
