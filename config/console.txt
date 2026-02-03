@@ -1,0 +1,15 @@
+// Charger les missions depuis GitHub
+fetch('https://raw.githubusercontent.com/Fab-404/fab-404.github.io/refs/heads/main/config/missionData.json')
+  .then(r => r.json())
+  .then(data => {
+    const missions = data.missions || [];
+    
+    // Simuler le message postMessage comme si c'était le Tampermonkey
+    window.postMessage({
+      type: 'missionsData',
+      payload: missions
+    }, '*');
+    
+    console.log('✅ Missions injectées:', missions.length);
+  })
+  .catch(e => console.error('❌ Erreur:', e));
