@@ -1,0 +1,136 @@
+/* Custom Styles for TBO GLOBAL Prototype */
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Excel-like Grid Styles (Modernized) */
+table {
+    border-collapse: separate;
+    /* Allows for sticky headers/borders nicely */
+    border-spacing: 0;
+    width: 100%;
+}
+
+th,
+td {
+    border-bottom: 1px solid #e2e8f0;
+    /* slate-200 */
+    border-right: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+}
+
+th {
+    background-color: #f8fafc;
+    /* slate-50 */
+    color: #475569;
+    /* slate-600 */
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow line for sticky */
+}
+
+/* Clean first/last borders */
+tr td:first-child,
+tr th:first-child {
+    border-left: 1px solid #e2e8f0;
+}
+
+tr:first-child th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+tr:first-child th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+/* Sidebar Navigation */
+.sidebar-link {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #3b82f6;
+    /* blue-500 */
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.sidebar-link:hover::before,
+.sidebar-link.active::before {
+    transform: scaleY(1);
+}
+
+.sidebar-link:hover {
+    background-color: #1e293b;
+    /* slate-800 */
+    color: #fff;
+    padding-left: 1rem;
+}
+
+.sidebar-link.active {
+    background-color: #1e293b;
+    /* slate-800 */
+    color: #60a5fa;
+    /* blue-400 */
+    font-weight: 500;
+}
