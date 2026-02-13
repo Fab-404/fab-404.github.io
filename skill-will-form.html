@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logistique MASTER-OPS V9.9 - Préparation de Commandes</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --slate-900: #0f172a; --blue-600: #2563eb; --emerald-600: #059669;
+            --rose-600: #dc2626; --amber-600: #d97706; --bg: #f8fafc;
+            --gray-200: #e2e8f0; --gray-600: #475569; --gray-800: #1e293b;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--gray-800); padding: 20px; line-height: 1.5; }
+        .container { max-width: 1400px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+       
+        header { background: var(--slate-900); color: white; padding: 25px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .input-group input { padding: 12px 16px; border-radius: 8px; border: none; width: 320px; font-weight: 600; font-size: 1.05rem; }
+       
+        .audit-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1400px) { .audit-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 800px)  { .audit-grid { grid-template-columns: 1fr; } }
+
+        .card { border: 1px solid var(--gray-200); padding: 24px; border-radius: 12px; background: white; border-top: 6px solid var(--blue-600); min-height: 320px; }
+        .card h3 { margin: 0 0 20px; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .q-row { margin-bottom: 18px; }
+        label { display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 5px; }
+        .weight-tag { font-size: 0.75rem; padding: 2px 7px; border-radius: 4px; background: #f1f5f9; color: #64748b; margin-left: 6px; vertical-align: middle; }
+        .summary { font-size: 0.8rem; font-style: italic; color: #64748b; display: block; margin-top: -5px; margin-bottom: 5px; }
+        select { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fdfdfd; cursor: pointer; font-size: 0.95rem; }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; }
+        .btn { padding: 18px 32px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: all 0.3s; font-size: 1rem; text-transform: uppercase; }
+        .btn-main { background: var(--blue-600); color: white; flex: 2; box-shadow: 0 4px 6px rgba(37,99,235,0.25); }
+        .btn-reset { background: #f1f5f9; color: #475569; flex: 1; border: 1px solid var(--gray-200); }
+        .btn:hover { transform: translateY(-3px); }
+
+        #resultArea { display: none; margin-top: 40px; border-top: 2px dashed var(--gray-200); padding-top: 40px; }
+        .report-layout { display: grid; grid-template-columns: 360px 1fr; gap: 30px; }
+        .sidebar { background: #f8fafc; padding: 30px; border-radius: 16px; text-align: center; border: 1px solid var(--gray-200); }
+        .score-circle { width: 130px; height: 130px; border-radius: 50%; border: 10px solid var(--blue-600); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 900; background: white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .plan-box { padding: 22px; border-radius: 12px; }
+        .plan-op { background: #eff6ff; border-left: 6px solid var(--blue-600); }
+        .plan-mgr { background: #f0fdf4; border-left: 6px solid var(--emerald-600); }
+        .plan-box h4 { margin: 0 0 15px; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 8px; }
+        .coaching-pro { background: var(--slate-900); color: white; padding: 32px; border-radius: 16px; line-height: 1.75; }
+        .coaching-pro h4 { color: var(--amber-600); margin-top: 0; }
+        .feedback-row { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
+        .prio-high { color: var(--rose-600); font-weight: bold; }
+
+        .skill-will { background: #f8fafc; padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px solid var(--gray-200); }
+        .skill-will h4 { margin-top: 0; }
+
+        /* Glossaire stylé + toggle */
+        .glossaire-toggle {
+            background: var(--blue-600);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 20px 0 0 0;
+            transition: all 0.3s;
+        }
+        .glossaire-toggle:hover { background: #1e40af; transform: translateY(-2px); }
+        .glossaire-toggle svg { transition: transform 0.3s; }
+        .glossaire-toggle.open svg { transform: rotate(180deg); }
+
+        .glossaire-content {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            margin-top: 12px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+        .glossaire-content.open {
+            max-height: 800px; /* Ajuste selon besoin */
+            padding: 20px;
+        }
+        .glossaire-content dl { margin: 0; }
+        .glossaire-content dt {
+            font-weight: 700;
+            color: var(--amber-600);
+            margin: 16px 0 4px 0;
+            font-size: 1.05rem;
+        }
+        .glossaire-content dd {
+            margin: 0 0 12px 20px;
+            color: var(--gray-800);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🚀 MASTER-OPS V9.9 - Préparation de Commandes</h1>
+        <div class="input-group">
+            <input type="text" id="collabName" placeholder="Nom du Collaborateur" autocomplete="off">
+        </div>
+    </header>
+    <div class="audit-grid" id="auditGrid"></div>
+    <div class="btn-group">
+        <button class="btn btn-main" id="btnGenerate">GÉNÉRER LE DIAGNOSTIC</button>
+        <button class="btn btn-reset" id="btnReset">RÉINITIALISER</button>
+    </div>
+    <div id="resultArea">
+        <div class="report-layout">
+            <aside class="sidebar">
+                <div class="score-circle" id="circleScore">0%</div>
+                <div id="reportName" style="font-size:1.15rem;font-weight:700;margin:15px 0;"></div>
+                <div id="levelText" style="font-weight:800;margin-bottom:20px;">PROFIL</div>
+                <canvas id="radarChart" style="max-height:280px;"></canvas>
+                <div class="skill-will" id="skillWillProfile"></div>
+            </aside>
+           
+            <section>
+                <div class="plan-grid">
+                    <div class="plan-box plan-op">
+                        <h4>📝 ACTIONS OPÉRATEUR</h4>
+                        <div id="opList"></div>
+                    </div>
+                    <div class="plan-box plan-mgr">
+                        <h4>👔 CHECKLIST MANAGER</h4>
+                        <div id="mgrList"></div>
+                    </div>
+                </div>
+                <div class="coaching-pro">
+                    <h4>💡 STRATÉGIE DE COACHING (PRIORITAIRE)</h4>
+                    <div id="coachingText"></div>
+
+                    <!-- Glossaire toggle -->
+                    <button class="glossaire-toggle" id="toggleGlossaire">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                        Voir le glossaire coaching
+                    </button>
+
+                    <div class="glossaire-content" id="glossaireContent">
+                        <dl>
+                            <dt>Retour 360°</dt>
+                            <dd>Collecte d’avis anonymes de collègues, supérieurs et parfois subordonnés pour avoir une vision complète de ses forces et axes d’amélioration.</dd>
+                            
+                            <dt>Objectifs SMART</dt>
+                            <dd>Méthode pour fixer des objectifs clairs :<br>
+                            • Spécifique<br>• Mesurable<br>• Atteignable<br>• Pertinent<br>• Temporel (délai précis)</dd>
+                            
+                            <dt>Checklist</dt>
+                            <dd>Liste de vérification simple à cocher pour ne rien oublier (ex. : double-scan, consignation roll).</dd>
+                            
+                            <dt>Rotation</dt>
+                            <dd>Changer de poste régulièrement (prépa ↔ chargement) pour développer la polyvalence.</dd>
+                            
+                            <dt>Auto-évaluation</dt>
+                            <dd>Le collaborateur note lui-même ses progrès (souvent comparé au retour du manager).</dd>
+                        </dl>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script>
+    // ====================== CONFIGURATION ======================
+    const QUESTIONS = [
+        { id: 'q1', label: 'Montage',      fullLabel: 'Montage & Stabilité (incl. Soin)', weight: 1, prio: 3,
+          options: [
+            {v:1,t:'1 - Critique : Instabilité majeure / dommages produits'},
+            {v:2,t:'2 - Insuffisant : Corrections fréquentes / manipulations risquées'},
+            {v:3,t:'3 - Conforme : Montage stable et soin standard'},
+            {v:4,t:'4 - Bon : Optimisé et vigilant'},
+            {v:5,t:'5 - Expert : Maître du Tetris avec soin exemplaire'}
+        ], summary: 'Évalue la stabilité des palettes et le soin apporté aux produits.'},
+        { id: 'q3', label: 'WMS',          fullLabel: 'Autonomie WMS',            weight: 1, prio: 1,
+          options: [
+            {v:1,t:'1 - Dépendant : Tout passe par le chef'},
+            {v:2,t:'2 - Assistance régulière nécessaire'},
+            {v:3,t:'3 - Autonome sur les bases'},
+            {v:4,t:'4 - Bonne maîtrise'},
+            {v:5,t:'5 - Référent : Dépanne les collègues'}
+        ], summary: 'Évalue l\'autonomie dans l\'utilisation du système WMS.'},
+        { id: 'q4', label: 'Trajet',       fullLabel: 'Fluidité Trajet',          weight: 5, prio: 5,
+          options: [
+            {v:1,t:'1 - Hésitant : Zig-zags fréquents'},
+            {v:2,t:'2 - Trajet non optimisé / anticipation faible'},
+            {v:3,t:'3 - Chemin maîtrisé'},
+            {v:4,t:'4 - Bonne anticipation des flux'},
+            {v:5,t:'5 - Expert : Optimisation permanente'}
+        ], summary: 'Évalue la fluidité et l\'optimisation des déplacements.'},
+        { id: 'q5', label: 'Productivité', fullLabel: 'Productivité',             weight: 5, prio: 5,
+          options: [
+            {v:1,t:'1 - Alerte : -20% ou plus sous cible horaire'},
+            {v:2,t:'2 - Sous la cible horaire'},
+            {v:3,t:'3 - Cible horaire atteinte'},
+            {v:4,t:'4 - Au-dessus de la cible horaire'},
+            {v:5,t:'5 - Top performer (+20% et plus)'}
+        ], summary: 'Évalue le respect des cibles productivité horaire.'},
+        { id: 'q6', label: 'Process',      fullLabel: 'Respect des Process Établis', weight: 3, prio: 4,
+          options: [
+            {v:1,t:'1 - Nul'},
+            {v:2,t:'2 - Faible'},
+            {v:3,t:'3 - Moyen'},
+            {v:4,t:'4 - Bon'},
+            {v:5,t:'5 - Excellent'}
+        ], summary: 'Évalue le respect des procédures comme massification et consignation.'},
+        { id: 'q12', label: 'Sécurité',    fullLabel: 'Respect Sécurité & Ergonomie', weight: 3, prio: 4,
+          options: [
+            {v:1,t:'1 - Nul'},
+            {v:2,t:'2 - Faible'},
+            {v:3,t:'3 - Moyen'},
+            {v:4,t:'4 - Bon'},
+            {v:5,t:'5 - Excellent'}
+        ], summary: 'Évalue le respect des règles de sécurité et gestes ergonomiques.'},
+        { id: 'q13', label: 'Anomalies',   fullLabel: 'Gestion Anomalies & Réactivité', weight: 3, prio: 3,
+          options: [
+            {v:1,t:'1 - Passif : Anomalies ignorées ou non signalées'},
+            {v:2,t:'2 - Réactif tardif : Signalement occasionnel / incomplet'},
+            {v:3,t:'3 - Correct : Remontée des anomalies principales'},
+            {v:4,t:'4 - Proactif : Remontée rapide et précise'},
+            {v:5,t:'5 - Expert : Anticipe et aide à résoudre les anomalies récurrentes'}
+        ], summary: 'Évalue la réactivité face aux anomalies comme stocks erronés.'},
+        { id: 'q11', label: 'Qualité',     fullLabel: 'Qualité de Préparation',   weight: 5, prio: 5,
+          options: [
+            {v:1,t:'1 - Erreurs graves : Commandes incomplètes / quantités fausses'},
+            {v:2,t:'2 - Erreurs mineures fréquentes'},
+            {v:3,t:'3 - Qualité standard : Peu d’erreurs'},
+            {v:4,t:'4 - Haute qualité : Vérifications proactives'},
+            {v:5,t:'5 - Exemplaire : Zéro défaut récurrent'}
+        ], summary: 'Évalue l\'exactitude des commandes préparées.'},
+        { id: 'q8', label: 'Polyvalence',  fullLabel: 'Polyvalence (Prépa/Chargement)', weight: 3, prio: 1,
+          options: [
+            {v:1,t:'1 - Monoposte uniquement'},
+            {v:2,t:'2 - Switch basique mais assisté'},
+            {v:3,t:'3 - Autonome sur les deux postes'},
+            {v:4,t:'4 - Switch fluide et optimisé'},
+            {v:5,t:'5 - Référent sur les deux postes'}
+        ], summary: 'Évalue la capacité à alterner entre préparation et chargement.'},
+        { id: 'q9', label: 'Équipe',       fullLabel: 'Esprit d’Équipe',         weight: 5, prio: 5,
+          options: [
+            {v:1,t:'1 - Passif / isolé'},
+            {v:2,t:'2 - Intégration moyenne'},
+            {v:3,t:'3 - Bonne intégration'},
+            {v:4,t:'4 - Très collaboratif'},
+            {v:5,t:'5 - Moteur de cohésion'}
+        ], summary: 'Évalue la collaboration et l\'intégration dans l\'équipe.'}
+    ];
+
+    const LOW_ACTIONS = {
+        q1:  { op: "[URGENT] Refaire palette témoin en binôme. Vérif. après 1 shift.", mgr: "Contrôler 3 sorties. Feedback stabilité (prio 3)." },
+        q3:  { op: "Revoir WMS en binôme. Tester saisies seul après 2 shifts.", mgr: "Accompagner saisies complexes. Objectif SMART : 80% autonomie en 5 jours (prio 1)." },
+        q4:  { op: "[URGENT] Suivre trajet sans zig-zag. Mesurer temps allée.", mgr: "Chronométrer 1 allée. Suivi quotidien (prio 5)." },
+        q5:  { op: "[URGENT] Booster cadence : scan + orga. Suivre prod/h 3 shifts.", mgr: "Repérer temps morts. Objectif SMART : +10% en 1 sem (prio 5)." },
+        q6:  { op: "Appliquer process : massifier + consigner roll. Checklist fin shift.", mgr: "Audit hebdo process. Suivi respect (prio 4)." },
+        q12: { op: "Gestes ergonomiques + règles sécu. Auto-check chaque shift.", mgr: "Observation terrain. Objectif SMART : 0 écart en 2 sem (prio 4)." },
+        q13: { op: "Signaler anomalies immédiatement. Compter remontées/shift.", mgr: "Vérifier réactivité. Suivi proactivité (prio 3)." },
+        q11: { op: "[URGENT] Double-vérif quantités/scans. Auditer 2 commandes perso.", mgr: "Auditer 5 commandes/shift. Priorité zéro-erreur (prio 5)." },
+        q8:  { op: "Pratiquer switch prépa/chargement. Éval après 1 rotation.", mgr: "Planifier rotations. Feedback fluidité (prio 1)." },
+        q9:  { op: "[URGENT] Communiquer + avec équipe. Noter 3 interactions positives/shift.", mgr: "Recadrage attitude. Objectif SMART : Aider 2 collègues/sem (prio 5)." }
+    };
+
+    let chartInstance = null;
+
+    // ====================== FONCTIONS UTILITAIRES ======================
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    }
+
+    // ====================== RENDU DU FORMULAIRE ======================
+    function renderAuditForm() {
+        const container = document.getElementById('auditGrid');
+        container.innerHTML = '';
+        const groups = [
+            { emoji: '📦', title: 'Technique (Prio 1-3)', color: 'var(--blue-600)',   qIds: ['q1','q3'] },
+            { emoji: '⚡', title: 'Flux & Prod (Prio 5)', color: 'var(--amber-600)', qIds: ['q4','q5','q11'] },
+            { emoji: '🛡️', title: 'Sécurité & Process (Prio 3-4)', color: 'var(--rose-600)',   qIds: ['q6','q12','q13'] },
+            { emoji: '🤝', title: 'Équipe & Polyvalence (Prio 1-5)', color: 'var(--emerald-600)', qIds: ['q8','q9'] }
+        ];
+        groups.forEach(group => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.borderTopColor = group.color;
+            const h3 = document.createElement('h3');
+            h3.textContent = `${group.emoji} ${group.title}`;
+            card.appendChild(h3);
+            group.qIds.forEach(id => {
+                const q = QUESTIONS.find(x => x.id === id);
+                if (!q) return;
+                const row = document.createElement('div');
+                row.className = 'q-row';
+                const label = document.createElement('label');
+                label.textContent = q.fullLabel + ' ';
+                const weightTag = document.createElement('span');
+                weightTag.className = 'weight-tag';
+                weightTag.textContent = `Prio ${q.prio}`;
+                if (q.prio === 5) {
+                    weightTag.style.backgroundColor = '#fee2e2';
+                    weightTag.style.color = '#ef4444';
+                }
+                label.appendChild(weightTag);
+                row.appendChild(label);
+                if (q.summary) {
+                    const summary = document.createElement('span');
+                    summary.className = 'summary';
+                    summary.textContent = q.summary;
+                    row.appendChild(summary);
+                }
+                const select = document.createElement('select');
+                select.id = q.id;
+                q.options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.v;
+                    option.textContent = opt.t;
+                    if (opt.v === 3) option.selected = true;
+                    select.appendChild(option);
+                });
+                row.appendChild(select);
+                card.appendChild(row);
+            });
+            container.appendChild(card);
+        });
+    }
+
+    // ====================== CALCULS ======================
+    function genererRapport() {
+        const nomRaw = document.getElementById('collabName').value.trim();
+        const nom = escapeHTML(nomRaw) || "Le préparateur";
+        const scores = {};
+        let totalPoints = 0, maxPoints = 0;
+        QUESTIONS.forEach(q => {
+            const val = parseInt(document.getElementById(q.id).value);
+            scores[q.id] = val;
+            totalPoints += val * q.weight;
+            maxPoints += 5 * q.weight;
+        });
+        const scorePercent = Math.round((totalPoints / maxPoints) * 100);
+
+        let weaknesses = QUESTIONS
+            .filter(q => scores[q.id] <= 2)
+            .sort((a, b) => b.weight - a.weight || b.prio - a.prio);
+
+        let opActions = [], mgrActions = [];
+        weaknesses.forEach(w => {
+            const action = LOW_ACTIONS[w.id];
+            if (action) {
+                const prefix = (w.prio === 5) ? "<span class='prio-high'>[URGENT]</span> " : "";
+                opActions.push(prefix + action.op);
+                mgrActions.push(prefix + action.mgr);
+            }
+        });
+        if (opActions.length === 0) opActions.push("Maintenir standards actuels. Retour : Feedback positif hebdo.");
+        if (mgrActions.length === 0) mgrActions.push("Féliciter performance. Valorisation équipe.");
+
+        const techAvg  = Math.round((scores.q1 + scores.q3) / 2);
+        const fluxAvg  = Math.round((scores.q4 + scores.q5 + scores.q11) / 3);
+        const safeProcAvg = Math.round((scores.q6 + scores.q12 + scores.q13) / 3);
+        const teamAvg  = Math.round((scores.q8 + scores.q9) / 2);
+
+        // Profil Compétences / Volonté
+        const competencesScore = Math.round((techAvg + fluxAvg + safeProcAvg + (scores.q8 + scores.q13) / 2) / 4);
+        const volonteScore = Math.round((teamAvg + (scores.q9 + scores.q6 + scores.q12) / 3) / 2);
+        let profilCompVol = '';
+        let conseilCompVol = '';
+        if (competencesScore > 3.5 && volonteScore > 3.5) {
+            profilCompVol = 'Compétences élevées / Volonté élevée - Le Pilier';
+            conseilCompVol = 'Déléguer et former les autres. Objectif : devenir référent.';
+        } else if (competencesScore > 3.5 && volonteScore <= 3.5) {
+            profilCompVol = 'Compétences élevées / Volonté faible - Le Mercenaire Solitaire';
+            conseilCompVol = 'Travailler la motivation via retours 360 et interactions.';
+        } else if (competencesScore <= 3.5 && volonteScore > 3.5) {
+            profilCompVol = 'Compétences faibles / Volonté élevée - L’Apprenti Motivé';
+            conseilCompVol = 'Focus formation compétences pour capitaliser sur la volonté.';
+        } else {
+            profilCompVol = 'Compétences faibles / Volonté faible - À Recadrer';
+            conseilCompVol = 'Plan urgence : booster volonté d’abord pour motiver compétences.';
+        }
+
+        // Coaching enrichi
+        let coachMsg = "";
+        const prod = scores.q5;
+        const qual = scores.q11;
+        const equipe = scores.q9;
+        const secu = scores.q12;
+        const ano = scores.q13;
+        const wms = scores.q3;
+        const poly = scores.q8;
+        const proc = scores.q6;
+
+        if (prod >= 4 && qual <= 2) {
+            coachMsg = `<b>PROFIL : LE RAPIDE MAIS IMPRÉCIS</b><br>
+            <b>Points clés :</b> Bon rendement mais erreurs qualité.<br>
+            <b>Méthodes :</b><br>
+            - Débrief 3 erreurs + retour 360 pairs.<br>
+            - Exercice double-scan 10 commandes.<br>
+            - Objectifs SMART : Réduire erreurs scans de 50 % en 2 semaines.<br>
+            <b>Conseils prioritaires :</b> Checklist perso fin prépa. Récompense zéro-erreur.`;
+        } else if (prod <= 2 && scores.q4 <= 2) {
+            coachMsg = `<b>PROFIL : LE FLÂNEUR</b><br>
+            <b>Points clés :</b> Déplacements lents, prod sous cible.<br>
+            <b>Méthodes :</b><br>
+            - Accompagnement 1 allée + retour 360 fluidité.<br>
+            - Simulations trajets.<br>
+            - Objectifs SMART : +10 % prod en 1 semaine.<br>
+            <b>Conseils prioritaires :</b> Timer perso. Focus anticipation.`;
+        } else if (wms <= 2) {
+            coachMsg = `<b>PROFIL : ADOPTION WMS À ACCÉLÉRER</b><br>
+            <b>Points clés :</b> Dépendance WMS.<br>
+            <b>Méthodes :</b><br>
+            - Binôme référent 2 shifts + retour 360 autonomie.<br>
+            - Ateliers groupe 1h/semaine.<br>
+            - Objectifs SMART : 80 % autonomie en 5 jours.<br>
+            <b>Conseils prioritaires :</b> Badge "WMS Pro". Vidéos auto-apprentissage.`;
+        } else if (secu <= 2) {
+            coachMsg = `<b>PROFIL : SÉCURITÉ À RENFORCER URGEMMENT</b><br>
+            <b>Points clés :</b> Écarts gestes/règles.<br>
+            <b>Méthodes :</b><br>
+            - Checklist terrain + retour 360 respect sécu.<br>
+            - Module sécurité 30 min.<br>
+            - Objectifs SMART : Zéro écart en 2 semaines.<br>
+            <b>Conseils prioritaires :</b> Pauses étirements. Audits surprise.`;
+        } else if (ano <= 2) {
+            coachMsg = `<b>PROFIL : RÉACTIVITÉ ANOMALIES À AMÉLIORER</b><br>
+            <b>Points clés :</b> Anomalies ignorées.<br>
+            <b>Méthodes :</b><br>
+            - Analyse 2 cas + retour 360 réactivité.<br>
+            - Checklist "Anomalie ?".<br>
+            - Objectifs SMART : 100 % remontées en 1 semaine.<br>
+            <b>Conseils prioritaires :</b> Culture signalement. Challenge équipe.`;
+        } else if (equipe <= 2) {
+            coachMsg = `<b>PROFIL : INTÉGRATION À AMÉLIORER</b><br>
+            <b>Points clés :</b> Collaboration faible.<br>
+            <b>Méthodes :</b><br>
+            - Entretien + retour 360 anonyme.<br>
+            - Rotations binôme.<br>
+            - Objectifs SMART : Aider 1 collègue/jour (1 mois).<br>
+            <b>Conseils prioritaires :</b> Valoriser aide. Sondage 360.`;
+        } else if (poly <= 2) {
+            coachMsg = `<b>PROFIL : POLYVALENCE À DÉVELOPPER</b><br>
+            <b>Points clés :</b> Limité à un poste.<br>
+            <b>Méthodes :</b><br>
+            - Rotation 1 shift + retour 360 switch.<br>
+            - Exercice switch fluide.<br>
+            - Objectifs SMART : Autonomie 2 postes en 2 semaines.<br>
+            <b>Conseils prioritaires :</b> Casser routine. Feedback post-rotation.`;
+        } else if (proc <= 2) {
+            coachMsg = `<b>PROFIL : RESPECT PROCESS À CONSOLIDER</b><br>
+            <b>Points clés :</b> Erreurs massification/consignation.<br>
+            <b>Méthodes :</b><br>
+            - Revue live + retour 360 respect process.<br>
+            - Checklist fin tâche.<br>
+            - Objectifs SMART : 100 % consignation en 1 semaine.<br>
+            <b>Conseils prioritaires :</b> Intégrer habitudes. Audit partagé.`;
+        } else if (prod >= 4 && equipe <= 2) {
+            coachMsg = `<b>PROFIL : LE MERCENAIRE SOLITAIRE</b><br>
+            <b>Points clés :</b> Prod haute mais équipe faible.<br>
+            <b>Méthodes :</b><br>
+            - Discussion + retour 360 collaboration.<br>
+            - Activités cohésion.<br>
+            - Objectifs SMART : 3 interactions positives/shift (1 mois).<br>
+            <b>Conseils prioritaires :</b> Lier prod à équipe. Récompenses collectives.`;
+        } else if (weaknesses.length > 0 && weaknesses[0].weight === 5) {
+            coachMsg = `<b>ALERTE PRIORITÉ STRATÉGIQUE</b><br>
+            <b>Points clés :</b> Faiblesse critique sur <b>${weaknesses[0].fullLabel}</b>.<br>
+            <b>Méthodes :</b><br>
+            - 100 % débriefings sur point + retour 360.<br>
+            - Plan personnalisé.<br>
+            - Objectifs SMART : +20 % sur critère en 1 semaine.<br>
+            <b>Conseils prioritaires :</b> Bonus si progrès. Focus unique.`;
+        } else if (techAvg <= 2) {
+            coachMsg = `<b>PROFIL : BASES TECHNIQUES À RENFORCER</b><br>
+            <b>Points clés :</b> Fondamentaux fragiles.<br>
+            <b>Méthodes :</b><br>
+            - Atelier montage/WMS + retour 360 bases.<br>
+            - Mentoring 3 shifts.<br>
+            - Objectifs SMART : Maîtrise bases en 2 semaines.<br>
+            <b>Conseils prioritaires :</b> Bases avant prod. Vidéos auto-apprentissage.`;
+        } else if (fluxAvg <= 2) {
+            coachMsg = `<b>PROFIL : FLUX À OPTIMISER</b><br>
+            <b>Points clés :</b> Trajet/prod/qualité faibles.<br>
+            <b>Méthodes :</b><br>
+            - Mapping trajet + retour 360 flux.<br>
+            - Simulations scans.<br>
+            - Objectifs SMART : KPI horaire hebdo.<br>
+            <b>Conseils prioritaires :</b> Vitesse + précision. Tableau perso.`;
+        } else if (safeProcAvg <= 2) {
+            coachMsg = `<b>PROFIL : PROCESS & SÉCURITÉ À CONSOLIDER</b><br>
+            <b>Points clés :</b> Faiblesses process/sécurité/anomalies.<br>
+            <b>Méthodes :</b><br>
+            - Revue live + retour 360 sécurité/process.<br>
+            - Formation mixte.<br>
+            - Objectifs SMART : 100 % compliance en 2 semaines.<br>
+            <b>Conseils prioritaires :</b> Checklists quotidiennes. Prévention risques.`;
+        } else if (teamAvg <= 2) {
+            coachMsg = `<b>PROFIL : INTÉGRATION À AMÉLIORER</b><br>
+            <b>Points clés :</b> Collaboration/polyvalence faibles.<br>
+            <b>Méthodes :</b><br>
+            - Rotations + retour 360 anonyme.<br>
+            - Débriefs groupe 15 min.<br>
+            - Objectifs SMART : Aider collègues (mensuel).<br>
+            <b>Conseils prioritaires :</b> Aide mutuelle. Bonus équipe.`;
+        } else if (scorePercent > 85) {
+            coachMsg = `<b>PROFIL : LE PILIER</b><br>
+            <b>Points clés :</b> Excellent, potentiel référent.<br>
+            <b>Méthodes :</b><br>
+            - Tuteur juniors + retour 360 transmission.<br>
+            - Projets optimisation.<br>
+            - Objectifs SMART : Former 2 juniors en 1 mois.<br>
+            <b>Conseils prioritaires :</b> Badge Expert. Varier postes.`;
+        } else {
+            coachMsg = `<b>PROFIL : EN PROGRESSION</b><br>
+            <b>Points clés :</b> Bons globaux, marge excellence.<br>
+            <b>Méthodes :</b><br>
+            - Bilan mensuel + retour 360 marges.<br>
+            - Ateliers WMS/sécurité.<br>
+            - Objectifs SMART : Booster polyvalence hebdo.<br>
+            <b>Conseils prioritaires :</b> Auto-évaluation. Récompenses objectifs.`;
+        }
+
+        // Affichage
+        document.getElementById('resultArea').style.display = 'block';
+        document.getElementById('circleScore').textContent = scorePercent + '%';
+        document.getElementById('circleScore').style.borderColor =
+            scorePercent > 80 ? 'var(--emerald-600)' : (scorePercent > 55 ? 'var(--blue-600)' : 'var(--rose-600)');
+        const levelEl = document.getElementById('levelText');
+        levelEl.textContent = scorePercent > 80 ? "EXPERT" : (scorePercent > 55 ? "VALIDÉ" : "À RECADRER");
+        levelEl.style.color = scorePercent > 80 ? 'var(--emerald-600)' : (scorePercent > 55 ? 'var(--blue-600)' : 'var(--rose-600)');
+        document.getElementById('reportName').textContent = `Audit de ${nom}`;
+
+        document.getElementById('opList').innerHTML = opActions.map(a => `<div class="feedback-row">${a}</div>`).join('');
+        document.getElementById('mgrList').innerHTML = mgrActions.map(a => `<div class="feedback-row">${a}</div>`).join('');
+        document.getElementById('coachingText').innerHTML = coachMsg;
+
+        document.getElementById('skillWillProfile').innerHTML = `<h4>Profil Compétences / Volonté</h4><b>${profilCompVol}</b><br>${conseilCompVol}`;
+
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: QUESTIONS.map(q => q.label),
+                datasets: [{
+                    data: QUESTIONS.map(q => scores[q.id]),
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    borderColor: '#2563eb',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#2563eb'
+                }]
+            },
+            options: {
+                scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+        window.scrollTo({ top: document.getElementById('resultArea').offsetTop - 50, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        QUESTIONS.forEach(q => {
+            const sel = document.getElementById(q.id);
+            if (sel) sel.value = 3;
+        });
+        document.getElementById('resultArea').style.display = 'none';
+        document.getElementById('collabName').value = '';
+    }
+
+    // ====================== TOGGLE GLOSSAIRE ======================
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('toggleGlossaire');
+        const content = document.getElementById('glossaireContent');
+
+        toggleBtn.addEventListener('click', () => {
+            content.classList.toggle('open');
+            toggleBtn.classList.toggle('open');
+            toggleBtn.querySelector('svg').style.transform = content.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+        });
+    });
+
+    // ====================== INITIALISATION ======================
+    renderAuditForm();
+    document.getElementById('btnGenerate').addEventListener('click', genererRapport);
+    document.getElementById('btnReset').addEventListener('click', resetForm);
+    document.getElementById('collabName').addEventListener('keypress', e => {
+        if (e.key === 'Enter') genererRapport();
+    });
+</script>
+</body>
+</html>
